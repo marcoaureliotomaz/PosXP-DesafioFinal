@@ -3,7 +3,7 @@ package br.com.posxp.clientesapi.service;
 import br.com.posxp.clientesapi.model.Cliente;
 import br.com.posxp.clientesapi.repository.ClienteRepository;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,11 +16,12 @@ public class ClienteService {
     }
 
     public List<Cliente> listarTodos() {
-        return clienteRepository.findAll();
+        return clienteRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
-    public Optional<Cliente> buscarPorId(Long id) {
-        return clienteRepository.findById(id);
+    public Cliente buscarPorId(Long id) {
+        return clienteRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Cliente com id " + id + " nao encontrado."));
     }
 
     public List<Cliente> buscarPorNome(String nome) {
@@ -31,12 +32,19 @@ public class ClienteService {
         return clienteRepository.save(cliente);
     }
 
+    public Cliente atualizar(Long id, Cliente clienteAtualizado) {
+        Cliente clienteExistente = buscarPorId(id);
+        clienteExistente.setNome(clienteAtualizado.getNome());
+        clienteExistente.setEmail(clienteAtualizado.getEmail());
+        return clienteRepository.save(clienteExistente);
+    }
+
     public void deletar(Long id) {
-        clienteRepository.deleteById(id);
+        Cliente cliente = buscarPorId(id);
+        clienteRepository.delete(cliente);
     }
 
     public long contarClientes() {
         return clienteRepository.count();
     }
 }
-

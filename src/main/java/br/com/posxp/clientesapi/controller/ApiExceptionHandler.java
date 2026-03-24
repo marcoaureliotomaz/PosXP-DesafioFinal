@@ -1,0 +1,88 @@
+package br.com.posxp.clientesapi.controller;
+
+import br.com.posxp.clientesapi.dto.ErroResponse;
+import br.com.posxp.clientesapi.service.RecursoNaoEncontradoException;
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+public class ApiExceptionHandler {
+
+    @ExceptionHandler(RecursoNaoEncontradoException.class)
+    public ResponseEntity<ErroResponse> handleNotFound(
+            RecursoNaoEncontradoException ex,
+            HttpServletRequest request
+    ) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI(), null);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErroResponse> handleValidation(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request
+    ) {
+        Map<String, String> validations = new LinkedHashMap<>();
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            validations.put(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                "Dados de entrada invalidos.",
+                request.getRequestURI(),
+                validations
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErroResponse> handleDataIntegrity(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                "Violacao de integridade dos dados. Verifique se o email ja esta cadastrado.",
+                request.getRequestURI(),
+                null
+        );
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErroResponse> handleGeneric(
+            Exception ex,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Erro interno inesperado.",
+                request.getRequestURI(),
+                null
+        );
+    }
+
+    private ResponseEntity<ErroResponse> buildResponse(
+            HttpStatus status,
+            String message,
+            String path,
+            Map<String, String> validations
+    ) {
+        ErroResponse body = new ErroResponse(
+                LocalDateTime.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                message,
+                path,
+                validations
+        );
+        return ResponseEntity.status(status).body(body);
+    }
+}
+
