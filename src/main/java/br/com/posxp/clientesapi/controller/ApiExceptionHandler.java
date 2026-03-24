@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
@@ -22,6 +24,7 @@ public class ApiExceptionHandler {
             RecursoNaoEncontradoException ex,
             HttpServletRequest request
     ) {
+        log.warn("Recurso nao encontrado. path={}, message={}", request.getRequestURI(), ex.getMessage());
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI(), null);
     }
 
@@ -34,6 +37,7 @@ public class ApiExceptionHandler {
         for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
             validations.put(fieldError.getField(), fieldError.getDefaultMessage());
         }
+        log.warn("Falha de validacao. path={}, errors={}", request.getRequestURI(), validations);
         return buildResponse(
                 HttpStatus.BAD_REQUEST,
                 "Dados de entrada invalidos.",
@@ -47,6 +51,7 @@ public class ApiExceptionHandler {
             DataIntegrityViolationException ex,
             HttpServletRequest request
     ) {
+        log.warn("Violacao de integridade. path={}, cause={}", request.getRequestURI(), ex.getMostSpecificCause().getMessage());
         return buildResponse(
                 HttpStatus.CONFLICT,
                 "Violacao de integridade dos dados. Verifique se o email ja esta cadastrado.",
@@ -60,6 +65,7 @@ public class ApiExceptionHandler {
             Exception ex,
             HttpServletRequest request
     ) {
+        log.error("Erro interno inesperado. path={}", request.getRequestURI(), ex);
         return buildResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Erro interno inesperado.",
@@ -85,4 +91,3 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(status).body(body);
     }
 }
-
