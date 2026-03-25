@@ -14,6 +14,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -55,6 +56,20 @@ public class ApiExceptionHandler {
         return buildResponse(
                 HttpStatus.CONFLICT,
                 "Violacao de integridade dos dados. Verifique se o email ja esta cadastrado.",
+                request.getRequestURI(),
+                null
+        );
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErroResponse> handleNoResourceFound(
+            NoResourceFoundException ex,
+            HttpServletRequest request
+    ) {
+        log.warn("Recurso estatico nao encontrado. path={}, message={}", request.getRequestURI(), ex.getMessage());
+        return buildResponse(
+                HttpStatus.NOT_FOUND,
+                "Recurso nao encontrado.",
                 request.getRequestURI(),
                 null
         );

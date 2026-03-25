@@ -1,0 +1,223 @@
+{
+  "info": {
+    "_postman_id": "9f1fef0d-2c54-4f55-9357-5e0d6f6f8f01",
+    "name": "Cliente API",
+    "description": "Collection para testar a API de clientes executando localmente ou via Docker.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "Clientes",
+      "item": [
+        {
+          "name": "Listar Todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Por ID Inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Por Nome",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/nome/Ana",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "nome",
+                "Ana"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Contar Clientes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/contar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "contar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Maria Oliveira\",\n  \"email\": \"maria.oliveira@exemplo.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Cliente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Maria Oliveira Atualizada\",\n  \"email\": \"maria.atualizada@exemplo.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Excluir Cliente",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Cliente Invalido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"email\": \"email-invalido\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

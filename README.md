@@ -118,6 +118,48 @@ mvn clean package
 mvn test
 ```
 
+## Executando com Docker
+
+Se o usuario nao tiver Java instalado localmente, a aplicacao tambem pode ser executada via Docker.
+
+Arquivos relacionados:
+
+- `Dockerfile`
+- `.dockerignore`
+
+### Gerar a imagem
+
+```bash
+docker build -t clientes-api .
+```
+
+### Subir o container
+
+```bash
+docker run --rm -p 8080:8080 clientes-api
+```
+
+Depois disso, a aplicacao ficara disponivel em:
+
+- `http://localhost:8080`
+- `http://localhost:8080/swagger-ui.html`
+- `http://localhost:8080/h2-console`
+
+### Parar o container
+
+Se o container estiver rodando em primeiro plano, basta interromper com:
+
+```bash
+Ctrl + C
+```
+
+Se estiver rodando em background, use:
+
+```bash
+docker ps
+docker stop <container_id>
+```
+
 ## Documentacao da API
 
 Com a aplicacao em execucao, a documentacao interativa pode ser acessada em:
@@ -136,6 +178,39 @@ Parametros padrao:
 - JDBC URL: `jdbc:h2:mem:clientesdb`
 - User: `sa`
 - Password: em branco
+
+## Collection do Postman
+
+O projeto possui uma collection pronta para importacao no Postman:
+
+- `Cliente-API.postman_collection.json`
+
+Essa collection contem as principais operacoes da API:
+
+- listar clientes
+- buscar cliente por ID
+- buscar cliente por nome
+- contar clientes
+- criar cliente
+- atualizar cliente
+- excluir cliente
+- validar retorno de erro `400`
+
+### Como usar no Postman
+
+1. Abra o Postman.
+2. Clique em `Import`.
+3. Selecione o arquivo `Cliente-API.postman_collection.json`.
+4. Garanta que a aplicacao esteja rodando em `http://localhost:8080`.
+5. Execute as requisicoes da pasta `Clientes`.
+
+### Variavel utilizada na collection
+
+A collection usa a variavel:
+
+- `{{baseUrl}} = http://localhost:8080`
+
+Se a aplicacao estiver rodando em outra porta ou host, basta alterar essa variavel no Postman.
 
 ## Endpoints Disponiveis
 
@@ -243,4 +318,3 @@ O projeto possui:
 - testes de integracao com MockMvc
 - testes unitarios de service, mapper e configuracao
 - relatorio de cobertura com JaCoCo em `target/site/jacoco/index.html`
-
