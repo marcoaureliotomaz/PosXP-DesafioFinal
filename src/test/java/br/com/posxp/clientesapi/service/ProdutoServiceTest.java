@@ -22,7 +22,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
 class ProdutoServiceTest {
@@ -46,12 +48,13 @@ class ProdutoServiceTest {
     @Test
     void deveListarTodosOrdenadosPorId() {
         List<Produto> produtos = List.of(produto);
-        when(produtoRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))).thenReturn(produtos);
+        PageRequest pageable = PageRequest.of(0, 10);
+        when(produtoRepository.findAll(pageable)).thenReturn(new PageImpl<>(produtos, pageable, produtos.size()));
 
-        List<Produto> resultado = produtoService.listarTodos();
+        Page<Produto> resultado = produtoService.listarTodos(pageable);
 
-        assertEquals(produtos, resultado);
-        verify(produtoRepository).findAll(Sort.by(Sort.Direction.ASC, "id"));
+        assertEquals(produtos, resultado.getContent());
+        verify(produtoRepository).findAll(pageable);
     }
 
     @Test
@@ -79,12 +82,14 @@ class ProdutoServiceTest {
     @Test
     void deveBuscarProdutosPorNome() {
         List<Produto> produtos = List.of(produto);
-        when(produtoRepository.findByNomeContainingIgnoreCase("Note")).thenReturn(produtos);
+        PageRequest pageable = PageRequest.of(0, 10);
+        when(produtoRepository.findByNomeContainingIgnoreCase("Note", pageable))
+                .thenReturn(new PageImpl<>(produtos, pageable, produtos.size()));
 
-        List<Produto> resultado = produtoService.buscarPorNome("Note");
+        Page<Produto> resultado = produtoService.buscarPorNome("Note", pageable);
 
-        assertEquals(produtos, resultado);
-        verify(produtoRepository).findByNomeContainingIgnoreCase("Note");
+        assertEquals(produtos, resultado.getContent());
+        verify(produtoRepository).findByNomeContainingIgnoreCase("Note", pageable);
     }
 
     @Test

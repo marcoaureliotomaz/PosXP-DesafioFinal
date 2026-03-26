@@ -21,7 +21,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
 class ClienteServiceTest {
@@ -45,12 +47,13 @@ class ClienteServiceTest {
     @Test
     void deveListarTodosOrdenadosPorId() {
         List<Cliente> clientes = List.of(cliente);
-        when(clienteRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))).thenReturn(clientes);
+        PageRequest pageable = PageRequest.of(0, 10);
+        when(clienteRepository.findAll(pageable)).thenReturn(new PageImpl<>(clientes, pageable, clientes.size()));
 
-        List<Cliente> resultado = clienteService.listarTodos();
+        Page<Cliente> resultado = clienteService.listarTodos(pageable);
 
-        assertEquals(clientes, resultado);
-        verify(clienteRepository).findAll(Sort.by(Sort.Direction.ASC, "id"));
+        assertEquals(clientes, resultado.getContent());
+        verify(clienteRepository).findAll(pageable);
     }
 
     @Test
@@ -78,12 +81,14 @@ class ClienteServiceTest {
     @Test
     void deveBuscarClientesPorNome() {
         List<Cliente> clientes = List.of(cliente);
-        when(clienteRepository.findByNomeContainingIgnoreCase("Ana")).thenReturn(clientes);
+        PageRequest pageable = PageRequest.of(0, 10);
+        when(clienteRepository.findByNomeContainingIgnoreCase("Ana", pageable))
+                .thenReturn(new PageImpl<>(clientes, pageable, clientes.size()));
 
-        List<Cliente> resultado = clienteService.buscarPorNome("Ana");
+        Page<Cliente> resultado = clienteService.buscarPorNome("Ana", pageable);
 
-        assertEquals(clientes, resultado);
-        verify(clienteRepository).findByNomeContainingIgnoreCase("Ana");
+        assertEquals(clientes, resultado.getContent());
+        verify(clienteRepository).findByNomeContainingIgnoreCase("Ana", pageable);
     }
 
     @Test

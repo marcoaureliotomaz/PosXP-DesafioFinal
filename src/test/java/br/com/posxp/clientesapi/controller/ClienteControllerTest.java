@@ -32,8 +32,15 @@ class ClienteControllerTest {
     void deveListarTodosOsClientes() throws Exception {
         mockMvc.perform(get("/clientes"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(100)))
-                .andExpect(jsonPath("$[0].nome", is("Ana Silva")));
+                .andExpect(jsonPath("$._embedded.clientes", hasSize(10)))
+                .andExpect(jsonPath("$._embedded.clientes[0].nome", is("Ana Silva")))
+                .andExpect(jsonPath("$._embedded.clientes[0]._links.self.href", is("http://localhost/clientes/1")))
+                .andExpect(jsonPath("$._links.self.href", is("http://localhost/clientes")))
+                .andExpect(jsonPath("$._links.next.href", is("http://localhost/clientes?page=1&size=10")))
+                .andExpect(jsonPath("$.page.size", is(10)))
+                .andExpect(jsonPath("$.page.totalElements", is(100)))
+                .andExpect(jsonPath("$.page.totalPages", is(10)))
+                .andExpect(jsonPath("$.page.number", is(0)));
     }
 
     @Test
@@ -41,7 +48,8 @@ class ClienteControllerTest {
         mockMvc.perform(get("/clientes/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.email", is("ana.silva@exemplo.com")));
+                .andExpect(jsonPath("$.email", is("ana.silva@exemplo.com")))
+                .andExpect(jsonPath("$._links.self.href", is("http://localhost/clientes/1")));
     }
 
     @Test
@@ -56,8 +64,31 @@ class ClienteControllerTest {
     void deveBuscarClientesPorNome() throws Exception {
         mockMvc.perform(get("/clientes/nome/Bruno"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].nome", is("Bruno Costa")));
+                .andExpect(jsonPath("$._embedded.clientes", hasSize(1)))
+                .andExpect(jsonPath("$._embedded.clientes[0].nome", is("Bruno Costa")))
+                .andExpect(jsonPath("$._links.self.href", is("http://localhost/clientes/nome/Bruno")))
+                .andExpect(jsonPath("$.page.totalElements", is(1)));
+    }
+
+    @Test
+    void devePaginarClientesComParametros() throws Exception {
+        mockMvc.perform(get("/clientes").param("page", "1").param("size", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.clientes", hasSize(5)))
+                .andExpect(jsonPath("$._embedded.clientes[0].id", is(6)))
+                .andExpect(jsonPath("$._links.self.href", is("http://localhost/clientes")))
+                .andExpect(jsonPath("$._links.next.href", is("http://localhost/clientes?page=2&size=5")))
+                .andExpect(jsonPath("$._links.prev.href", is("http://localhost/clientes?page=0&size=5")))
+                .andExpect(jsonPath("$.page.size", is(5)))
+                .andExpect(jsonPath("$.page.number", is(1)));
+    }
+
+    @Test
+    void deveRetornar400QuandoSortForInvalido() throws Exception {
+        mockMvc.perform(get("/clientes").param("sort", "string"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.message", is("Parametro de ordenacao invalido. Utilize campos validos, por exemplo sort=id,asc.")));
     }
 
     @Test

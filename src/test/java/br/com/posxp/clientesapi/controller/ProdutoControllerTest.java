@@ -32,8 +32,14 @@ class ProdutoControllerTest {
     void deveListarTodosOsProdutos() throws Exception {
         mockMvc.perform(get("/produtos"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(100)))
-                .andExpect(jsonPath("$[0].nome", is("Notebook")));
+                .andExpect(jsonPath("$._embedded.produtos", hasSize(10)))
+                .andExpect(jsonPath("$._embedded.produtos[0].nome", is("Notebook")))
+                .andExpect(jsonPath("$._embedded.produtos[0]._links.self.href", is("http://localhost/produtos/1")))
+                .andExpect(jsonPath("$._links.self.href", is("http://localhost/produtos")))
+                .andExpect(jsonPath("$._links.next.href", is("http://localhost/produtos?page=1&size=10")))
+                .andExpect(jsonPath("$.page.totalElements", is(100)))
+                .andExpect(jsonPath("$.page.totalPages", is(10)))
+                .andExpect(jsonPath("$.page.number", is(0)));
     }
 
     @Test
@@ -41,7 +47,8 @@ class ProdutoControllerTest {
         mockMvc.perform(get("/produtos/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.descricao", is("Notebook de alta performance")));
+                .andExpect(jsonPath("$.descricao", is("Notebook de alta performance")))
+                .andExpect(jsonPath("$._links.self.href", is("http://localhost/produtos/1")));
     }
 
     @Test
@@ -56,8 +63,23 @@ class ProdutoControllerTest {
     void deveBuscarProdutosPorNome() throws Exception {
         mockMvc.perform(get("/produtos/nome/Mouse"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].nome", is("Mouse")));
+                .andExpect(jsonPath("$._embedded.produtos", hasSize(1)))
+                .andExpect(jsonPath("$._embedded.produtos[0].nome", is("Mouse")))
+                .andExpect(jsonPath("$._links.self.href", is("http://localhost/produtos/nome/Mouse")))
+                .andExpect(jsonPath("$.page.totalElements", is(1)));
+    }
+
+    @Test
+    void devePaginarProdutosComParametros() throws Exception {
+        mockMvc.perform(get("/produtos").param("page", "1").param("size", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.produtos", hasSize(5)))
+                .andExpect(jsonPath("$._embedded.produtos[0].id", is(6)))
+                .andExpect(jsonPath("$._links.self.href", is("http://localhost/produtos")))
+                .andExpect(jsonPath("$._links.next.href", is("http://localhost/produtos?page=2&size=5")))
+                .andExpect(jsonPath("$._links.prev.href", is("http://localhost/produtos?page=0&size=5")))
+                .andExpect(jsonPath("$.page.size", is(5)))
+                .andExpect(jsonPath("$.page.number", is(1)));
     }
 
     @Test

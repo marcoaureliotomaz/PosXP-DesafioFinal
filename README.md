@@ -10,6 +10,7 @@ A solução foi concebida para demonstrar:
 - separação de responsabilidades por camadas
 - modelagem de domínio com relacionamentos
 - persistência com Spring Data JPA
+- HATEOAS com Spring HATEOAS
 - observabilidade com logs e Actuator
 - documentação com Swagger / OpenAPI
 - testes automatizados
@@ -25,6 +26,7 @@ A solução foi concebida para demonstrar:
 - Lombok
 - Springdoc OpenAPI / Swagger UI
 - Spring Boot Actuator
+- Spring HATEOAS
 - JUnit 5
 - MockMvc
 - Mockito
@@ -179,6 +181,43 @@ Justificativa acadêmica e técnica:
 - reduz risco de acoplamento indevido entre persistência e interface
 - melhora controle sobre validação e serialização
 
+### Uso De `class` Em Vez De `record` Nos DTOs De Saída
+
+Os DTOs de entrada continuam usando `record`, pois representam apenas estruturas simples e imutáveis de transporte de dados.
+
+Os DTOs de saída principais passaram a usar `class` nos arquivos:
+
+- [ClienteResponse.java](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\src\main\java\br\com\posxp\clientesapi\dto\ClienteResponse.java)
+- [ProdutoResponse.java](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\src\main\java\br\com\posxp\clientesapi\dto\ProdutoResponse.java)
+- [PedidoResponse.java](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\src\main\java\br\com\posxp\clientesapi\dto\PedidoResponse.java)
+
+Essa decisão foi necessária porque, com a adoção de HATEOAS, esses objetos passaram a estender `RepresentationModel`, o que não é possível com `record`.
+
+Justificativa técnica:
+
+- `record` não pode herdar de classes concretas ou abstratas além de `java.lang.Record`
+- HATEOAS exige comportamento adicional para anexar links ao recurso
+- `class` permite herança, inclusão de links e manutenção do contrato de saída enriquecido
+
+Em síntese, `record` foi mantido onde o papel é apenas transportar dados, enquanto `class` foi adotada onde o objeto também representa hipermídia.
+
+### HATEOAS
+
+Foi incorporado HATEOAS nas respostas dos recursos principais com Spring HATEOAS.
+
+As respostas agora expõem links navegaveis para:
+
+- o proprio recurso (`self`)
+- a colecao do recurso
+- recursos relacionados, como o cliente associado a um pedido
+
+Justificativa tecnica e academica:
+
+- reforca aderencia ao estilo REST
+- reduz dependencia do cliente em URIs fixas conhecidas previamente
+- melhora descoberta de recursos
+- torna o contrato HTTP mais expressivo e evolutivo
+
 ### Service Layer
 
 A camada de serviço concentra regras de negócio, como:
@@ -247,13 +286,47 @@ Foi incorporada uma camada enxuta de observabilidade com:
 
 Essa decisão reforça boas práticas operacionais, permitindo inspeção de saúde, informações da aplicação e métricas.
 
+### Beneficios Arquiteturais Do HATEOAS
+
+- melhora navegabilidade entre recursos da API
+- reduz acoplamento entre consumidor e estrutura interna de rotas
+- facilita evolucao futura da API com menor impacto para clientes
+- torna a API mais aderente a um modelo REST rico em hipermidia
+
+## Analise De Aderencia Ao Estilo RESTful
+
+A aplicação pode ser considerada uma API REST em sentido prático e está próxima de uma API RESTful mais completa.
+
+### Elementos Que Aproximam A API Do Estilo RESTful
+
+- recursos identificados por URIs claras, como `/clientes`, `/produtos` e `/pedidos`
+- uso consistente dos métodos HTTP `GET`, `POST`, `PUT` e `DELETE`
+- respostas com códigos HTTP semânticos, como `200`, `201`, `204`, `400`, `404` e `409`
+- uso de JSON como representação dos recursos
+- ausência de estado de sessão entre requisições
+- uso de HATEOAS para enriquecer respostas com links navegáveis
+
+### Pontos Que Impedem Classificar A API Como Totalmente RESTful Em Sentido Purista
+
+- alguns endpoints seguem abordagem pragmática e não totalmente orientada a filtragem por query string, como:
+  - `/clientes/nome/{nome}`
+  - `/produtos/nome/{nome}`
+  - `/pedidos/status/{status}`
+- endpoints como `/clientes/contar`, `/produtos/contar` e `/pedidos/contar` são úteis e claros, mas fogem de uma modelagem REST mais estrita, que tenderia a tratar contagem como metadado de coleção ou resultado de consulta
+- a API não implementa negociação avançada de mídia além do suporte JSON/HAL básico
+- não há versionamento explícito de API, o que é comum em APIs REST maduras
+
+### Conclusao
+
+A API adota os princípios centrais de uma solução RESTful e se encontra em um nível alto de aderência para uso acadêmico e profissional comum. Ainda assim, algumas decisões de design foram mantidas de forma pragmática para privilegiar clareza, simplicidade de consumo e objetividade da entrega.
+
 ## Artefatos De Arquitetura
 
 Os artefatos de documentação arquitetural estão na pasta `doc`:
 
-- [ENTREGAVEIS.md](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\ENTREGAVEIS.md)
-- [ARQUITETURA-C4.md](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\ARQUITETURA-C4.md)
-- [Enunciado do Desafio Final - Arquiteto(a) de Software.pdf](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\Enunciado%20do%20Desafio%20Final%20-%20Arquiteto(a)%20de%20Software.pdf)
+- [ENTREGAVEIS.md](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\03-entrega\ENTREGAVEIS.md)
+- [ARQUITETURA-C4.md](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\ARQUITETURA-C4.md)
+- [Enunciado do Desafio Final - Arquiteto(a) de Software.pdf](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\01-enunciado\Enunciado%20do%20Desafio%20Final%20-%20Arquiteto(a)%20de%20Software.pdf)
 
 ## Como Executar
 
@@ -294,6 +367,39 @@ docker build -t clientes-api .
 docker run --rm -p 8080:8080 clientes-api
 ```
 
+### Parar o container executado manualmente
+
+```bash
+docker ps
+docker stop <container_id>
+```
+
+## Executando Com Docker Compose
+
+### Subir a aplicação
+
+```bash
+docker compose up --build
+```
+
+### Executar em segundo plano
+
+```bash
+docker compose up --build -d
+```
+
+### Parar a aplicação
+
+```bash
+docker compose down
+```
+
+### Arquivo de orquestração
+
+- [docker-compose.yml](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\docker-compose.yml)
+  - sobe a aplicação utilizando o `Dockerfile` do projeto
+  - publica a porta `8080`
+
 ### Endereços úteis
 
 - `http://localhost:8080/swagger-ui.html`
@@ -333,6 +439,24 @@ Variável utilizada:
 
 ## Endpoints Disponíveis
 
+Os endpoints de listagem e busca paginada aceitam os parâmetros opcionais:
+
+- `page`: número da página, iniciando em `0`
+- `size`: quantidade de registros por página
+- `sort`: campo e direção de ordenação, por exemplo `sort=id,asc`
+
+Exemplos:
+
+- `GET /clientes?page=0&size=10&sort=id,asc`
+- `GET /produtos?page=1&size=5`
+- `GET /pedidos/status/CRIADO?page=0&size=3`
+
+No Swagger, o parâmetro `sort` não deve ficar como `string`. Use sempre um campo real da entidade, por exemplo:
+
+- `sort=id,asc`
+- `sort=nome,desc`
+- `sort=dataCriacao,desc`
+
 ### Clientes
 
 - `GET /clientes`
@@ -362,6 +486,77 @@ Variável utilizada:
 - `POST /pedidos`
 - `PUT /pedidos/{id}`
 - `DELETE /pedidos/{id}`
+
+## Paginação
+
+As operações de listagem de `clientes`, `produtos` e `pedidos`, bem como as buscas por `nome` e `status`, retornam payload HAL paginado com:
+
+- `_embedded`: coleção de recursos da página atual
+- `_links`: links de navegação, como `self`, `next` e `prev`
+- `page`: metadados com número da página, tamanho, total de elementos e total de páginas
+
+Essa decisão melhora escalabilidade da API, evita retorno de coleções excessivamente grandes e torna a navegação entre páginas explícita para o consumidor.
+
+## Uso De HATEOAS
+
+As respostas de recursos individuais incluem `_links` e as respostas de coleção incluem `_embedded`, `_links` e, quando aplicável, metadados de paginação.
+
+### Exemplo De Recurso Individual
+
+```json
+{
+  "id": 1,
+  "nome": "Ana Silva",
+  "email": "ana.silva@exemplo.com",
+  "_links": {
+    "self": {
+      "href": "http://localhost:8080/clientes/1"
+    },
+    "clientes": {
+      "href": "http://localhost:8080/clientes"
+    },
+    "contagem": {
+      "href": "http://localhost:8080/clientes/contar"
+    }
+  }
+}
+```
+
+### Exemplo De Colecao
+
+```json
+{
+  "_embedded": {
+    "produtos": [
+      {
+        "id": 1,
+        "nome": "Notebook",
+        "descricao": "Notebook de alta performance",
+        "preco": 4500.00,
+        "_links": {
+          "self": {
+            "href": "http://localhost:8080/produtos/1"
+          }
+        }
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "http://localhost:8080/produtos"
+    },
+    "next": {
+      "href": "http://localhost:8080/produtos?page=1&size=10"
+    }
+  },
+  "page": {
+    "size": 10,
+    "totalElements": 100,
+    "totalPages": 10,
+    "number": 0
+  }
+}
+```
 
 ## Exemplos De Payload
 

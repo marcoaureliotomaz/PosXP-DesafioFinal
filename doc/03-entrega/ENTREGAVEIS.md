@@ -27,11 +27,11 @@
   - decisões arquiteturais
   - justificativas técnicas
 
-- [ARQUITETURA-C4.md](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\ARQUITETURA-C4.md)
+- [ARQUITETURA-C4.md](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\ARQUITETURA-C4.md)
   - descrição textual do modelo arquitetural
   - base para diagrama visual em draw.io
 
-- [Enunciado do Desafio Final - Arquiteto(a) de Software.pdf](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\Enunciado%20do%20Desafio%20Final%20-%20Arquiteto(a)%20de%20Software.pdf)
+- [Enunciado do Desafio Final - Arquiteto(a) de Software.pdf](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\01-enunciado\Enunciado%20do%20Desafio%20Final%20-%20Arquiteto(a)%20de%20Software.pdf)
   - documento original do desafio
 
 - [Cliente-API.postman_collection.json](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\Cliente-API.postman_collection.json)
@@ -51,6 +51,8 @@
 - uso de `Builder` para montagem do agregado `Pedido`
 - tratamento centralizado de exceções
 - observabilidade via logs e Actuator
+- uso de `HATEOAS` nas respostas da API
+- uso de `class` nos DTOs de saída enriquecidos por hipermídia
 
 ## Justificativa Acadêmica
 
@@ -63,12 +65,13 @@ Essas decisões demonstram preocupação com:
 - testabilidade
 - rastreabilidade da execução
 - clareza na documentação da arquitetura
+- coerência entre contrato HTTP e modelo de representação
 
 ## Sugestão De Pacote Para Entrega
 
 1. Repositório Git com histórico de commits
 2. `README.md` atualizado
-3. diagrama visual em draw.io, png ou pdf com base em `doc/ARQUITETURA-C4.md`
+3. diagrama visual em draw.io, png ou pdf com base em `doc/02-arquitetura/ARQUITETURA-C4.md`
 4. collection Postman para demonstração
 5. evidências de execução local, Swagger e testes
 

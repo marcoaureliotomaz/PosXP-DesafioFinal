@@ -103,6 +103,7 @@ Este documento descreve a arquitetura da solução em formato textual, servindo 
 - requests e responses de cliente, produto e pedido
 - `ContagemResponse`
 - `ErroResponse`
+- respostas enriquecidas com links HATEOAS
 
 ### Mappers
 
@@ -154,6 +155,7 @@ Este documento descreve a arquitetura da solução em formato textual, servindo 
 - `DTO + Mapper` para desacoplar modelo interno do contrato HTTP
 - `Builder` para construção controlada de agregados complexos
 - `Dependency Inversion` por meio de interfaces de serviço
+- `HATEOAS` para descoberta e navegabilidade entre recursos
 
 ## Como Desenhar No draw.io
 

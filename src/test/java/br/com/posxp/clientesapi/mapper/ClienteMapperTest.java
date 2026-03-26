@@ -27,8 +27,9 @@ class ClienteMapperTest {
 
         ClienteResponse response = ClienteMapper.toResponse(cliente);
 
-        assertEquals(1L, response.id());
-        assertEquals("Ana Silva", response.nome());
-        assertEquals("ana.silva@exemplo.com", response.email());
+        assertEquals(1L, response.getId());
+        assertEquals("Ana Silva", response.getNome());
+        assertEquals("ana.silva@exemplo.com", response.getEmail());
+        assertEquals("/clientes/1", response.getRequiredLink("self").getHref());
     }
 }

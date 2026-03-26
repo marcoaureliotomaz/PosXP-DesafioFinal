@@ -32,9 +32,14 @@ class PedidoControllerTest {
     void deveListarTodosOsPedidos() throws Exception {
         mockMvc.perform(get("/pedidos"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(10)))
-                .andExpect(jsonPath("$[0].status", is("CRIADO")))
-                .andExpect(jsonPath("$[0].itens", hasSize(5)));
+                .andExpect(jsonPath("$._embedded.pedidos", hasSize(10)))
+                .andExpect(jsonPath("$._embedded.pedidos[0].status", is("CRIADO")))
+                .andExpect(jsonPath("$._embedded.pedidos[0].itens", hasSize(5)))
+                .andExpect(jsonPath("$._embedded.pedidos[0]._links.self.href", is("http://localhost/pedidos/1")))
+                .andExpect(jsonPath("$._links.self.href", is("http://localhost/pedidos")))
+                .andExpect(jsonPath("$.page.totalElements", is(10)))
+                .andExpect(jsonPath("$.page.totalPages", is(1)))
+                .andExpect(jsonPath("$.page.number", is(0)));
     }
 
     @Test
@@ -43,7 +48,9 @@ class PedidoControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.clienteId", is(1)))
-                .andExpect(jsonPath("$.total", is(6927.75)));
+                .andExpect(jsonPath("$.total", is(6927.75)))
+                .andExpect(jsonPath("$._links.self.href", is("http://localhost/pedidos/1")))
+                .andExpect(jsonPath("$._links.cliente.href", is("http://localhost/clientes/1")));
     }
 
     @Test
@@ -58,8 +65,22 @@ class PedidoControllerTest {
     void deveBuscarPedidosPorStatus() throws Exception {
         mockMvc.perform(get("/pedidos/status/CRIADO"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(3)))
-                .andExpect(jsonPath("$[0].status", is("CRIADO")));
+                .andExpect(jsonPath("$._embedded.pedidos", hasSize(3)))
+                .andExpect(jsonPath("$._embedded.pedidos[0].status", is("CRIADO")))
+                .andExpect(jsonPath("$._links.self.href", is("http://localhost/pedidos/status/CRIADO")))
+                .andExpect(jsonPath("$.page.totalElements", is(3)));
+    }
+
+    @Test
+    void devePaginarPedidosComParametros() throws Exception {
+        mockMvc.perform(get("/pedidos").param("page", "1").param("size", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.pedidos", hasSize(5)))
+                .andExpect(jsonPath("$._embedded.pedidos[0].id", is(6)))
+                .andExpect(jsonPath("$._links.self.href", is("http://localhost/pedidos")))
+                .andExpect(jsonPath("$._links.prev.href", is("http://localhost/pedidos?page=0&size=5")))
+                .andExpect(jsonPath("$.page.size", is(5)))
+                .andExpect(jsonPath("$.page.number", is(1)));
     }
 
     @Test

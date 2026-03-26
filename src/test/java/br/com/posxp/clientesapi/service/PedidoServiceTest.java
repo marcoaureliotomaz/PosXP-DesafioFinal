@@ -30,7 +30,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
 class PedidoServiceTest {
@@ -72,12 +74,14 @@ class PedidoServiceTest {
 
     @Test
     void deveListarTodosOrdenadosPorId() {
-        when(pedidoRepository.findAllWithDetalhes(Sort.by(Sort.Direction.ASC, "id"))).thenReturn(List.of(pedido));
+        PageRequest pageable = PageRequest.of(0, 10);
+        when(pedidoRepository.findAllWithDetalhes(pageable))
+                .thenReturn(new PageImpl<>(List.of(pedido), pageable, 1));
 
-        List<Pedido> resultado = pedidoService.listarTodos();
+        Page<Pedido> resultado = pedidoService.listarTodos(pageable);
 
-        assertEquals(1, resultado.size());
-        verify(pedidoRepository).findAllWithDetalhes(Sort.by(Sort.Direction.ASC, "id"));
+        assertEquals(1, resultado.getContent().size());
+        verify(pedidoRepository).findAllWithDetalhes(pageable);
     }
 
     @Test
@@ -103,12 +107,13 @@ class PedidoServiceTest {
 
     @Test
     void deveBuscarPedidosPorStatus() {
-        when(pedidoRepository.findByStatusWithDetalhes(PedidoStatus.CRIADO, Sort.by(Sort.Direction.ASC, "id")))
-                .thenReturn(List.of(pedido));
+        PageRequest pageable = PageRequest.of(0, 10);
+        when(pedidoRepository.findByStatusWithDetalhes(PedidoStatus.CRIADO, pageable))
+                .thenReturn(new PageImpl<>(List.of(pedido), pageable, 1));
 
-        List<Pedido> resultado = pedidoService.buscarPorStatus(PedidoStatus.CRIADO);
+        Page<Pedido> resultado = pedidoService.buscarPorStatus(PedidoStatus.CRIADO, pageable);
 
-        assertEquals(1, resultado.size());
+        assertEquals(1, resultado.getContent().size());
     }
 
     @Test

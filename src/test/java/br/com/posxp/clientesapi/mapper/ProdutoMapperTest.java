@@ -29,9 +29,10 @@ class ProdutoMapperTest {
 
         ProdutoResponse response = ProdutoMapper.toResponse(produto);
 
-        assertEquals(1L, response.id());
-        assertEquals("Mouse", response.nome());
-        assertEquals("Mouse sem fio", response.descricao());
-        assertEquals(new BigDecimal("120.00"), response.preco());
+        assertEquals(1L, response.getId());
+        assertEquals("Mouse", response.getNome());
+        assertEquals("Mouse sem fio", response.getDescricao());
+        assertEquals(new BigDecimal("120.00"), response.getPreco());
+        assertEquals("/produtos/1", response.getRequiredLink("self").getHref());
     }
 }
