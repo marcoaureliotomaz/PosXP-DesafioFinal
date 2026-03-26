@@ -1,0 +1,22 @@
+sequenceDiagram
+    actor Usuario
+    participant ProdutoController
+    participant ProdutoServiceImpl
+    participant ProdutoRepository
+    participant ItemPedidoRepository
+    participant ApiExceptionHandler
+    participant H2 as Banco H2
+
+    Usuario->>ProdutoController: DELETE /produtos/{id}
+    ProdutoController->>ProdutoServiceImpl: deletar(id)
+    ProdutoServiceImpl->>ProdutoRepository: findById(id)
+    ProdutoRepository->>H2: SELECT produto
+    H2-->>ProdutoRepository: Produto
+    ProdutoRepository-->>ProdutoServiceImpl: Produto
+    ProdutoServiceImpl->>ItemPedidoRepository: existsByProdutoId(id)
+    ItemPedidoRepository->>H2: SELECT existência de itens
+    H2-->>ItemPedidoRepository: true
+    ItemPedidoRepository-->>ProdutoServiceImpl: true
+    ProdutoServiceImpl-->>ProdutoController: lança OperacaoNaoPermitidaException
+    ProdutoController->>ApiExceptionHandler: trata exceção
+    ApiExceptionHandler-->>Usuario: 409 Conflict\nErroResponse

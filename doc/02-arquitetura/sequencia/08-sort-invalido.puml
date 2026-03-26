@@ -1,0 +1,21 @@
+@startuml
+title Listagem Com Sort Inválido
+
+actor Usuario
+participant ClienteController
+participant ClienteServiceImpl
+participant ClienteRepository
+participant ApiExceptionHandler
+participant "Banco H2" as H2
+
+Usuario -> ClienteController : GET /clientes?sort=string
+ClienteController -> ClienteServiceImpl : listarTodos(pageable)
+ClienteServiceImpl -> ClienteRepository : findAll(pageable)
+ClienteRepository -> H2 : tenta aplicar ordenação inválida
+H2 --> ClienteRepository : erro de propriedade
+ClienteRepository --> ClienteServiceImpl : PropertyReferenceException / InvalidDataAccessApiUsageException
+ClienteServiceImpl --> ClienteController : propaga exceção
+ClienteController -> ApiExceptionHandler : trata exceção
+ApiExceptionHandler --> Usuario : 400 Bad Request\nErroResponse
+
+@enduml

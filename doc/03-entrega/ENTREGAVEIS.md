@@ -29,10 +29,55 @@
 
 - [ARQUITETURA-C4.md](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\ARQUITETURA-C4.md)
   - descrição textual do modelo arquitetural
-  - base para diagrama visual em draw.io
+  - base descritiva dos diagramas finais
 
 - [Enunciado do Desafio Final - Arquiteto(a) de Software.pdf](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\01-enunciado\Enunciado%20do%20Desafio%20Final%20-%20Arquiteto(a)%20de%20Software.pdf)
   - documento original do desafio
+
+- [arquitetura-contexto.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\arquitetura-contexto.png)
+  - diagrama C4 de contexto exportado
+
+- [arquitetura-containers.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\arquitetura-containers.png)
+  - diagrama C4 de containers exportado
+
+- [arquitetura-componentes.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\arquitetura-componentes.png)
+  - diagrama C4 de componentes exportado
+
+- [sequencia](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia)
+  - diagramas de sequência dos principais fluxos da aplicação
+
+- [01-criar-cliente.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\01-criar-cliente.png)
+  - diagrama de sequência de criação de cliente
+
+- [02-criar-produto.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\02-criar-produto.png)
+  - diagrama de sequência de criação de produto
+
+- [03-criar-pedido.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\03-criar-pedido.png)
+  - diagrama de sequência de criação de pedido
+
+- [04-atualizar-pedido.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\04-atualizar-pedido.png)
+  - diagrama de sequência de atualização de pedido
+
+- [05-listar-clientes-paginado.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\05-listar-clientes-paginado.png)
+  - diagrama de sequência de listagem paginada
+
+- [06-excluir-cliente-bloqueado.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\06-excluir-cliente-bloqueado.png)
+  - diagrama de sequência de exclusão bloqueada de cliente
+
+- [07-excluir-produto-bloqueado.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\07-excluir-produto-bloqueado.png)
+  - diagrama de sequência de exclusão bloqueada de produto
+
+- [08-sort-invalido.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\08-sort-invalido.png)
+  - diagrama de sequência do tratamento de ordenação inválida
+
+- [09-validacao-payload-invalido.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\09-validacao-payload-invalido.png)
+  - diagrama de sequência do tratamento de payload inválido
+
+- [10-criar-cliente-email-duplicado.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\10-criar-cliente-email-duplicado.png)
+  - diagrama de sequência do tratamento de email duplicado em cliente
+
+- [docker-compose.yml](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\docker-compose.yml)
+  - orquestração simplificada da aplicação
 
 - [Cliente-API.postman_collection.json](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\Cliente-API.postman_collection.json)
   - collection pronta para testes funcionais
@@ -71,12 +116,11 @@ Essas decisões demonstram preocupação com:
 
 1. Repositório Git com histórico de commits
 2. `README.md` atualizado
-3. diagrama visual em draw.io, png ou pdf com base em `doc/02-arquitetura/ARQUITETURA-C4.md`
+3. diagramas visuais em `.png` presentes em `doc/02-arquitetura`
 4. collection Postman para demonstração
 5. evidências de execução local, Swagger e testes
 
 ## Pendências Opcionais Para Fortalecer Ainda Mais
 
-- exportar o diagrama arquitetural para `.png` ou `.pdf`
 - incluir imagens do Swagger e da execução dos endpoints
 - adicionar diagramas complementares de entidade-relacionamento ou sequência

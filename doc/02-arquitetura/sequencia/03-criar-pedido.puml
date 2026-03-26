@@ -1,0 +1,44 @@
+@startuml
+title Criar Pedido
+
+actor Usuario
+participant PedidoController
+participant PedidoServiceImpl
+participant ClienteRepository
+participant ProdutoRepository
+participant PedidoBuilder
+participant PedidoRepository
+participant PedidoMapper
+participant "Banco H2" as H2
+
+Usuario -> PedidoController : POST /pedidos\nPedidoRequest
+PedidoController -> PedidoServiceImpl : salvar(request)
+PedidoServiceImpl -> ClienteRepository : findById(clienteId)
+ClienteRepository -> H2 : SELECT cliente
+H2 --> ClienteRepository : Cliente
+ClienteRepository --> PedidoServiceImpl : Cliente
+
+loop para cada item do pedido
+    PedidoServiceImpl -> ProdutoRepository : findById(produtoId)
+    ProdutoRepository -> H2 : SELECT produto
+    H2 --> ProdutoRepository : Produto
+    ProdutoRepository --> PedidoServiceImpl : Produto
+    PedidoServiceImpl -> PedidoBuilder : adicionarItem(produto, quantidade)
+end
+
+PedidoServiceImpl -> PedidoBuilder : build()
+PedidoBuilder --> PedidoServiceImpl : Pedido
+PedidoServiceImpl -> PedidoRepository : save(pedido)
+PedidoRepository -> H2 : INSERT pedido + itens
+H2 --> PedidoRepository : pedido persistido
+PedidoRepository --> PedidoServiceImpl : Pedido
+PedidoServiceImpl -> PedidoRepository : findByIdWithDetalhes(id)
+PedidoRepository -> H2 : SELECT pedido + cliente + itens
+H2 --> PedidoRepository : Pedido completo
+PedidoRepository --> PedidoServiceImpl : Pedido
+PedidoServiceImpl --> PedidoController : Pedido
+PedidoController -> PedidoMapper : toResponse(pedido)
+PedidoMapper --> PedidoController : PedidoResponse + links
+PedidoController --> Usuario : 201 Created\nLocation + payload HAL
+
+@enduml

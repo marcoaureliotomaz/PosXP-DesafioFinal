@@ -2,13 +2,25 @@
   "info": {
     "_postman_id": "9f1fef0d-2c54-4f55-9357-5e0d6f6f8f01",
     "name": "Cliente API",
-    "description": "Collection para testar a API de clientes executando localmente ou via Docker.",
+    "description": "Collection completa para testar os endpoints de clientes, produtos e pedidos executando localmente ou via Docker.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
       "value": "http://localhost:8080"
+    },
+    {
+      "key": "clienteCriadoId",
+      "value": ""
+    },
+    {
+      "key": "produtoCriadoId",
+      "value": ""
+    },
+    {
+      "key": "pedidoCriadoId",
+      "value": ""
     }
   ],
   "item": [
@@ -16,24 +28,39 @@
       "name": "Clientes",
       "item": [
         {
-          "name": "Listar Todos",
+          "name": "Listar Clientes Paginado",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/clientes",
+              "raw": "{{baseUrl}}/clientes?page=0&size=5&sort=id,asc",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "clientes"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "sort",
+                  "value": "id,asc"
+                }
               ]
-            }
+            },
+            "description": "Lista clientes com paginação e ordenação válidas."
           },
           "response": []
         },
         {
-          "name": "Buscar Por ID",
+          "name": "Buscar Cliente Por ID",
           "request": {
             "method": "GET",
             "header": [],
@@ -51,30 +78,12 @@
           "response": []
         },
         {
-          "name": "Buscar Por ID Inexistente",
+          "name": "Buscar Cliente Por Nome",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/clientes/999",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "clientes",
-                "999"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Buscar Por Nome",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/clientes/nome/Ana",
+              "raw": "{{baseUrl}}/clientes/nome/Ana?page=0&size=5&sort=id,asc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -82,6 +91,20 @@
                 "clientes",
                 "nome",
                 "Ana"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "sort",
+                  "value": "id,asc"
+                }
               ]
             }
           },
@@ -107,6 +130,20 @@
         },
         {
           "name": "Criar Cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('clienteCriadoId', body.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -117,7 +154,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Maria Oliveira\",\n  \"email\": \"maria.oliveira@exemplo.com\"\n}",
+              "raw": "{\n  \"nome\": \"Cliente Postman {{$timestamp}}\",\n  \"email\": \"cliente.postman.{{$timestamp}}@exemplo.com\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -132,12 +169,13 @@
               "path": [
                 "clientes"
               ]
-            }
+            },
+            "description": "Cria um cliente com email dinâmico e salva o ID em {{clienteCriadoId}}."
           },
           "response": []
         },
         {
-          "name": "Atualizar Cliente",
+          "name": "Atualizar Cliente Criado",
           "request": {
             "method": "PUT",
             "header": [
@@ -148,13 +186,51 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Maria Oliveira Atualizada\",\n  \"email\": \"maria.atualizada@exemplo.com\"\n}",
+              "raw": "{\n  \"nome\": \"Cliente Postman Atualizado\",\n  \"email\": \"cliente.atualizado.{{$timestamp}}@exemplo.com\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
             },
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{clienteCriadoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{clienteCriadoId}}"
+              ]
+            },
+            "description": "Execute após 'Criar Cliente'. Atualiza o cliente armazenado em {{clienteCriadoId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "Excluir Cliente Criado",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{clienteCriadoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{clienteCriadoId}}"
+              ]
+            },
+            "description": "Execute após 'Criar Cliente'. Remove o cliente armazenado em {{clienteCriadoId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "Excluir Cliente Com Pedidos Vinculados",
+          "request": {
+            "method": "DELETE",
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/clientes/1",
               "host": [
@@ -164,23 +240,24 @@
                 "clientes",
                 "1"
               ]
-            }
+            },
+            "description": "Deve retornar 409, pois o cliente 1 possui pedidos associados."
           },
           "response": []
         },
         {
-          "name": "Excluir Cliente",
+          "name": "Buscar Cliente Inexistente",
           "request": {
-            "method": "DELETE",
+            "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/clientes/2",
+              "raw": "{{baseUrl}}/clientes/9999",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "clientes",
-                "2"
+                "9999"
               ]
             }
           },
@@ -214,6 +291,593 @@
                 "clientes"
               ]
             }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Clientes Com Sort Invalido",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes?page=0&size=5&sort=string",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "sort",
+                  "value": "string"
+                }
+              ]
+            },
+            "description": "Deve retornar 400 para validar o tratamento de sort inválido."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Produtos",
+      "item": [
+        {
+          "name": "Listar Produtos Paginado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/produtos?page=0&size=5&sort=id,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "produtos"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "sort",
+                  "value": "id,asc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Produto Por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/produtos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "produtos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Produto Por Nome",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/produtos/nome/Notebook?page=0&size=5&sort=id,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "produtos",
+                "nome",
+                "Notebook"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "sort",
+                  "value": "id,asc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Contar Produtos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/produtos/contar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "produtos",
+                "contar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Produto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('produtoCriadoId', body.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Produto Postman {{$timestamp}}\",\n  \"descricao\": \"Produto criado via collection do Postman\",\n  \"preco\": 199.90\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/produtos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "produtos"
+              ]
+            },
+            "description": "Cria um produto e salva o ID em {{produtoCriadoId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Produto Criado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Produto Postman Atualizado\",\n  \"descricao\": \"Produto atualizado via collection do Postman\",\n  \"preco\": 249.90\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/produtos/{{produtoCriadoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "produtos",
+                "{{produtoCriadoId}}"
+              ]
+            },
+            "description": "Execute após 'Criar Produto'. Atualiza o produto armazenado em {{produtoCriadoId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "Excluir Produto Criado",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/produtos/{{produtoCriadoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "produtos",
+                "{{produtoCriadoId}}"
+              ]
+            },
+            "description": "Execute após 'Criar Produto'. Remove o produto armazenado em {{produtoCriadoId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "Excluir Produto Com Itens De Pedido",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/produtos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "produtos",
+                "1"
+              ]
+            },
+            "description": "Deve retornar 409, pois o produto 1 está associado a itens de pedido."
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Produto Inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/produtos/9999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "produtos",
+                "9999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Produto Invalido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"descricao\": \"\",\n  \"preco\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/produtos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "produtos"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pedidos",
+      "item": [
+        {
+          "name": "Listar Pedidos Paginado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pedidos?page=0&size=5&sort=id,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "sort",
+                  "value": "id,asc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Pedido Por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Pedidos Por Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/status/CRIADO?page=0&size=5&sort=id,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos",
+                "status",
+                "CRIADO"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "sort",
+                  "value": "id,asc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Contar Pedidos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/contar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos",
+                "contar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Pedido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('pedidoCriadoId', body.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": 12,\n  \"status\": \"CRIADO\",\n  \"itens\": [\n    {\n      \"produtoId\": 2,\n      \"quantidade\": 2\n    },\n    {\n      \"produtoId\": 43,\n      \"quantidade\": 1\n    },\n    {\n      \"produtoId\": 44,\n      \"quantidade\": 3\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos"
+              ]
+            },
+            "description": "Cria um pedido e salva o ID em {{pedidoCriadoId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Pedido Criado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": 13,\n  \"status\": \"PAGO\",\n  \"itens\": [\n    {\n      \"produtoId\": 45,\n      \"quantidade\": 1\n    },\n    {\n      \"produtoId\": 46,\n      \"quantidade\": 2\n    },\n    {\n      \"produtoId\": 47,\n      \"quantidade\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/{{pedidoCriadoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos",
+                "{{pedidoCriadoId}}"
+              ]
+            },
+            "description": "Execute após 'Criar Pedido'. Atualiza o pedido armazenado em {{pedidoCriadoId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "Excluir Pedido Criado",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/{{pedidoCriadoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos",
+                "{{pedidoCriadoId}}"
+              ]
+            },
+            "description": "Execute após 'Criar Pedido'. Remove o pedido armazenado em {{pedidoCriadoId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Pedido Inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/9999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos",
+                "9999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Pedido Invalido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": null,\n  \"status\": \"CRIADO\",\n  \"itens\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Pedido Com Cliente Inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": 9999,\n  \"status\": \"CRIADO\",\n  \"itens\": [\n    {\n      \"produtoId\": 2,\n      \"quantidade\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos"
+              ]
+            },
+            "description": "Deve retornar 404 para cliente inexistente."
           },
           "response": []
         }

@@ -1,0 +1,49 @@
+@startuml
+title Atualizar Pedido
+
+actor Usuario
+participant PedidoController
+participant PedidoServiceImpl
+participant PedidoRepository
+participant ClienteRepository
+participant ProdutoRepository
+participant PedidoBuilder
+participant PedidoMapper
+participant "Banco H2" as H2
+
+Usuario -> PedidoController : PUT /pedidos/{id}\nPedidoRequest
+PedidoController -> PedidoServiceImpl : atualizar(id, request)
+PedidoServiceImpl -> PedidoRepository : findById(id)
+PedidoRepository -> H2 : SELECT pedido
+H2 --> PedidoRepository : Pedido
+PedidoRepository --> PedidoServiceImpl : Pedido existente
+
+PedidoServiceImpl -> ClienteRepository : findById(clienteId)
+ClienteRepository -> H2 : SELECT cliente
+H2 --> ClienteRepository : Cliente
+ClienteRepository --> PedidoServiceImpl : Cliente
+
+loop para cada item atualizado
+    PedidoServiceImpl -> ProdutoRepository : findById(produtoId)
+    ProdutoRepository -> H2 : SELECT produto
+    H2 --> ProdutoRepository : Produto
+    ProdutoRepository --> PedidoServiceImpl : Produto
+    PedidoServiceImpl -> PedidoBuilder : adicionarItem(produto, quantidade)
+end
+
+PedidoServiceImpl -> PedidoBuilder : build()
+PedidoBuilder --> PedidoServiceImpl : Pedido atualizado
+PedidoServiceImpl -> PedidoRepository : save(pedidoAtualizado)
+PedidoRepository -> H2 : UPDATE pedido + itens
+H2 --> PedidoRepository : pedido atualizado
+PedidoRepository --> PedidoServiceImpl : Pedido
+PedidoServiceImpl -> PedidoRepository : findByIdWithDetalhes(id)
+PedidoRepository -> H2 : SELECT pedido completo
+H2 --> PedidoRepository : Pedido completo
+PedidoRepository --> PedidoServiceImpl : Pedido
+PedidoServiceImpl --> PedidoController : Pedido
+PedidoController -> PedidoMapper : toResponse(pedido)
+PedidoMapper --> PedidoController : PedidoResponse + links
+PedidoController --> Usuario : 200 OK
+
+@enduml

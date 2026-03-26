@@ -1,0 +1,20 @@
+sequenceDiagram
+    actor Usuario
+    participant ProdutoController
+    participant ProdutoMapper
+    participant ProdutoServiceImpl
+    participant ProdutoRepository
+    participant H2 as Banco H2
+
+    Usuario->>ProdutoController: POST /produtos\nProdutoRequest
+    ProdutoController->>ProdutoMapper: toEntity(request)
+    ProdutoMapper-->>ProdutoController: Produto
+    ProdutoController->>ProdutoServiceImpl: salvar(produto)
+    ProdutoServiceImpl->>ProdutoRepository: save(produto)
+    ProdutoRepository->>H2: INSERT produto
+    H2-->>ProdutoRepository: produto persistido
+    ProdutoRepository-->>ProdutoServiceImpl: Produto
+    ProdutoServiceImpl-->>ProdutoController: Produto
+    ProdutoController->>ProdutoMapper: toResponse(produto)
+    ProdutoMapper-->>ProdutoController: ProdutoResponse + links
+    ProdutoController-->>Usuario: 201 Created\nLocation + payload HAL

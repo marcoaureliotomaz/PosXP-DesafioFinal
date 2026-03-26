@@ -1,0 +1,27 @@
+@startuml
+title Listar Clientes Com Paginação
+
+actor Usuario
+participant ClienteController
+participant ClienteServiceImpl
+participant ClienteRepository
+participant ClienteMapper
+participant "Banco H2" as H2
+
+Usuario -> ClienteController : GET /clientes?page=0&size=10&sort=id,asc
+ClienteController -> ClienteServiceImpl : listarTodos(pageable)
+ClienteServiceImpl -> ClienteRepository : findAll(pageable)
+ClienteRepository -> H2 : SELECT clientes paginados
+H2 --> ClienteRepository : Page<Cliente>
+ClienteRepository --> ClienteServiceImpl : Page<Cliente>
+ClienteServiceImpl --> ClienteController : Page<Cliente>
+
+loop para cada cliente da página
+    ClienteController -> ClienteMapper : toResponse(cliente)
+    ClienteMapper --> ClienteController : ClienteResponse + links
+end
+
+ClienteController -> ClienteController : toPagedModel(page)
+ClienteController --> Usuario : 200 OK\nPagedModel HAL
+
+@enduml
