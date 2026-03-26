@@ -2,114 +2,158 @@
 
 ## Objetivo
 
-Este documento descreve a arquitetura da solucao em formato textual, servindo como base para a criacao do diagrama em draw.io.
+Este documento descreve a arquitetura da solução em formato textual, servindo como base para a criação do diagrama em draw.io.
 
-## Nivel 1 - Contexto
+## Nível 1 - Contexto
 
 ### Pessoa
 
 - Parceiro / Avaliador
-  - consome a API REST para consultar, criar, atualizar e remover clientes
+  - consome a API REST para consultar, criar, atualizar e remover clientes, produtos e pedidos
 
 ### Sistema
 
 - Clientes API
-  - sistema backend responsavel por expor operacoes REST sobre o dominio Cliente
+  - sistema backend responsável por expor operações REST sobre os domínios `Cliente`, `Produto` e `Pedido`
 
 ### Relacionamentos
 
 - Parceiro / Avaliador -> Clientes API
   - utiliza HTTP/JSON para consumir a API
 
-## Nivel 2 - Containers
+## Nível 2 - Containers
 
 ### Container 1
 
-- Aplicacao Spring Boot
+- Aplicação Spring Boot
   - implementada em Java 17
-  - concentra controller, service, repository, DTOs, configuracoes e tratamento de excecao
+  - concentra controllers, services, repositories, DTOs, mappers, builders, configurações e tratamento de exceção
 
 ### Container 2
 
 - Banco H2
-  - banco relacional em memoria
-  - armazena os registros de clientes durante a execucao
+  - banco relacional em memória
+  - armazena clientes, produtos, pedidos e itens de pedido
 
 ### Container 3
 
 - Swagger UI / OpenAPI
-  - documentacao interativa da API
-  - permite visualizar e testar os endpoints
+  - documentação interativa da API
+  - permite visualizar e testar endpoints
+
+### Container 4
+
+- Spring Boot Actuator
+  - endpoints técnicos de health, info e metrics
 
 ### Relacionamentos
 
-- Parceiro / Avaliador -> Aplicacao Spring Boot
+- Parceiro / Avaliador -> Aplicação Spring Boot
   - consome endpoints REST via HTTP
 
-- Aplicacao Spring Boot -> Banco H2
+- Aplicação Spring Boot -> Banco H2
   - persiste e consulta dados via Spring Data JPA / Hibernate
 
 - Parceiro / Avaliador -> Swagger UI / OpenAPI
-  - consulta a documentacao da API pelo navegador
+  - consulta a documentação da API via navegador
 
-- Swagger UI / OpenAPI -> Aplicacao Spring Boot
-  - obtem o contrato OpenAPI exposto em `/v3/api-docs`
+- Swagger UI / OpenAPI -> Aplicação Spring Boot
+  - obtém o contrato exposto em `/v3/api-docs`
 
-## Nivel 3 - Componentes Da Aplicacao Spring Boot
+- Parceiro / Avaliador -> Spring Boot Actuator
+  - consulta informações operacionais da aplicação
 
-### Controller
+## Nível 3 - Componentes Da Aplicação Spring Boot
+
+### Controllers
 
 - `ClienteController`
-  - recebe requisicoes HTTP
-  - expoe os endpoints REST
-  - converte entrada e saida usando DTOs e mapper
+- `ProdutoController`
+- `PedidoController`
+  - recebem requisições HTTP
+  - expõem endpoints REST
+  - delegam regras de negócio para a camada de serviço
 
-### Service
+### Services
 
-- `ClienteService`
-  - centraliza a logica de negocio
-  - coordena consultas, atualizacoes, exclusoes e contagem
+- `ClienteService` / `ClienteServiceImpl`
+- `ProdutoService` / `ProdutoServiceImpl`
+- `PedidoService` / `PedidoServiceImpl`
+  - centralizam a lógica de negócio
+  - aplicam validações de fluxo e regras de integridade
 
-### Repository
+### Repositories
 
 - `ClienteRepository`
-  - interface de acesso a dados com Spring Data JPA
-  - realiza operacoes de persistencia sobre `Cliente`
+- `ProdutoRepository`
+- `PedidoRepository`
+- `ItemPedidoRepository`
+  - abstraem a persistência com Spring Data JPA
 
 ### Model
 
 - `Cliente`
-  - entidade de dominio persistida no banco
+- `Produto`
+- `Pedido`
+- `ItemPedido`
+- `PedidoStatus`
 
 ### DTOs
 
-- `ClienteRequest`
-- `ClienteResponse`
+- requests e responses de cliente, produto e pedido
 - `ContagemResponse`
 - `ErroResponse`
-  - desacoplam o contrato HTTP do modelo interno
+
+### Mappers
+
+- `ClienteMapper`
+- `ProdutoMapper`
+- `PedidoMapper`
+  - convertem entre entidades e DTOs
+
+### Builder
+
+- `PedidoBuilder`
+  - encapsula a montagem do agregado `Pedido`
+  - associa cliente, itens, subtotais e total
 
 ### Tratamento De Erros
 
 - `ApiExceptionHandler`
-  - padroniza erros de validacao, recurso inexistente, conflito e falhas internas
+- `RecursoNaoEncontradoException`
+- `OperacaoNaoPermitidaException`
 
-### Configuracao
+### Configuração
 
 - `OpenApiConfig`
-  - define metadados da documentacao OpenAPI
-
 - `LoggingConfig`
-  - configura logging de requisicoes HTTP
 
-### Relacionamentos
+## Relacionamentos Entre Componentes
 
 - `ClienteController` -> `ClienteService`
-- `ClienteService` -> `ClienteRepository`
-- `ClienteRepository` -> `Cliente`
-- `ClienteController` -> `ClienteMapper`
-- `ClienteController` -> DTOs
-- `ApiExceptionHandler` -> DTO `ErroResponse`
+- `ProdutoController` -> `ProdutoService`
+- `PedidoController` -> `PedidoService`
+
+- `ClienteServiceImpl` -> `ClienteRepository`
+- `ProdutoServiceImpl` -> `ProdutoRepository`
+- `ProdutoServiceImpl` -> `ItemPedidoRepository`
+- `PedidoServiceImpl` -> `PedidoRepository`
+- `PedidoServiceImpl` -> `ClienteRepository`
+- `PedidoServiceImpl` -> `ProdutoRepository`
+
+- `PedidoServiceImpl` -> `PedidoBuilder`
+
+- controllers -> mappers -> DTOs
+- exceções -> `ApiExceptionHandler` -> `ErroResponse`
+
+## Decisões Arquiteturais Evidenciadas No C4
+
+- `MVC` para organizar a aplicação por responsabilidade
+- `Repository` para desacoplar regra de negócio da persistência
+- `Service Layer` para concentrar lógica de negócio
+- `DTO + Mapper` para desacoplar modelo interno do contrato HTTP
+- `Builder` para construção controlada de agregados complexos
+- `Dependency Inversion` por meio de interfaces de serviço
 
 ## Como Desenhar No draw.io
 
@@ -122,27 +166,36 @@ Este documento descreve a arquitetura da solucao em formato textual, servindo co
 ### Containers
 
 - dentro do sistema, desenhar:
-  - `Aplicacao Spring Boot`
+  - `Aplicação Spring Boot`
   - `Banco H2`
   - `Swagger UI / OpenAPI`
+  - `Spring Boot Actuator`
 - conectar:
-  - usuario -> aplicacao
-  - usuario -> swagger
-  - swagger -> aplicacao
-  - aplicacao -> banco
+  - usuário -> aplicação
+  - usuário -> swagger
+  - swagger -> aplicação
+  - usuário -> actuator
+  - aplicação -> banco
 
 ### Componentes
 
-- dentro da aplicacao, desenhar os blocos:
+- dentro da aplicação, desenhar os blocos:
   - `ClienteController`
-  - `ClienteService`
-  - `ClienteRepository`
-  - `Cliente`
+  - `ProdutoController`
+  - `PedidoController`
+  - `ClienteService / Impl`
+  - `ProdutoService / Impl`
+  - `PedidoService / Impl`
+  - `Repositories`
+  - `Entities`
   - `DTOs`
+  - `Mappers`
+  - `PedidoBuilder`
   - `ApiExceptionHandler`
   - `OpenApiConfig`
   - `LoggingConfig`
 - conectar em fluxo:
   - request -> controller -> service -> repository -> banco
-  - controller <-> DTOs
-  - excecoes -> handler
+  - controller -> mapper -> DTO
+  - pedido service -> builder
+  - exceções -> handler

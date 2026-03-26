@@ -1,18 +1,19 @@
 # Desafio Final POS XP
 
-## Visao Geral
+## Visão Geral
 
-Este projeto implementa uma API REST para gerenciamento de clientes como solucao para o desafio final da pos em Arquitetura de Software.
+Este projeto implementa uma API REST para gerenciamento de clientes, produtos e pedidos como solução para o desafio final da pós em Arquitetura de Software.
 
-A aplicacao foi desenvolvida com foco em:
+A solução foi concebida para demonstrar:
 
-- arquitetura MVC
-- separacao de responsabilidades por camadas
-- persistencia com Spring Data JPA
-- documentacao via Swagger / OpenAPI
-- observabilidade com logs
-- validacao de entrada e tratamento padronizado de erros
+- aplicação do padrão MVC em contexto de API REST
+- separação de responsabilidades por camadas
+- modelagem de domínio com relacionamentos
+- persistência com Spring Data JPA
+- observabilidade com logs e Actuator
+- documentação com Swagger / OpenAPI
 - testes automatizados
+- empacotamento com Docker
 
 ## Stack Utilizada
 
@@ -23,44 +24,99 @@ A aplicacao foi desenvolvida com foco em:
 - H2 Database
 - Lombok
 - Springdoc OpenAPI / Swagger UI
+- Spring Boot Actuator
 - JUnit 5
 - MockMvc
 - Mockito
 - JaCoCo
+- Docker
 
-## Dominio Escolhido
+## Domínio Da Solução
 
-O dominio da API e `Cliente`.
+O projeto evoluiu de um CRUD simples para um domínio de vendas com quatro elementos centrais:
 
-Cada cliente possui os seguintes atributos:
+- `Cliente`
+- `Produto`
+- `Pedido`
+- `ItemPedido`
+
+### Entidades
+
+`Cliente`
 
 - `id`
 - `nome`
 - `email`
 
+`Produto`
+
+- `id`
+- `nome`
+- `descricao`
+- `preco`
+
+`Pedido`
+
+- `id`
+- `cliente`
+- `status`
+- `total`
+- `dataCriacao`
+- `itens`
+
+`ItemPedido`
+
+- `id`
+- `pedido`
+- `produto`
+- `quantidade`
+- `precoUnitario`
+- `subtotal`
+
+`PedidoStatus`
+
+- `CRIADO`
+- `PAGO`
+- `CANCELADO`
+- `ENVIADO`
+- `FINALIZADO`
+
+### Regras De Negócio Implementadas
+
+- `Pedido` possui `status`
+- `Pedido` armazena o `total`
+- `ItemPedido` armazena o `precoUnitario` no momento da compra
+- o total do pedido é recalculado a partir dos itens
+- não é permitido excluir `Cliente` com pedidos associados
+- não é permitido excluir `Produto` com itens de pedido associados
+
 ## Funcionalidades Implementadas
 
-- Criar cliente
-- Listar todos os clientes
-- Buscar cliente por ID
-- Buscar clientes por nome
-- Atualizar cliente
-- Excluir cliente
-- Contar total de clientes
-- Validar dados de entrada
-- Retornar `404` para recurso inexistente
-- Retornar `409` para conflito de integridade
+- CRUD completo de clientes
+- CRUD completo de produtos
+- CRUD completo de pedidos
+- busca por nome para clientes e produtos
+- busca por status para pedidos
+- contagem total de clientes, produtos e pedidos
+- validação de entrada com Bean Validation
+- tratamento padronizado de erros
+- documentação interativa da API
+- observabilidade técnica com Actuator
+- dados iniciais para demonstração
 
-## Estrutura do Projeto
+## Estrutura Do Projeto
 
 ```text
 src
 +-- main
 |   +-- java
 |   |   +-- br/com/posxp/clientesapi
+|   |       +-- builder
 |   |       +-- config
 |   |       +-- controller
 |   |       +-- dto
+|   |       +-- exception
+|   |       +-- mapper
 |   |       +-- model
 |   |       +-- repository
 |   |       +-- service
@@ -73,115 +129,158 @@ src
     |   +-- br/com/posxp/clientesapi
     |       +-- config
     |       +-- controller
+    |       +-- mapper
     |       +-- service
     +-- resources
         +-- application-test.properties
 ```
 
-## Papel de Cada Camada
+## Papel De Cada Pacote
 
-- `config`: configuracoes de infraestrutura, logging e OpenAPI.
-- `controller`: endpoints REST e orquestracao das requisicoes HTTP.
-- `dto`: objetos de entrada e saida da API.
-- `model`: entidades de dominio persistidas.
-- `repository`: acesso a dados com Spring Data JPA.
-- `service`: regras de negocio da aplicacao.
-- `resources`: configuracoes da aplicacao e carga inicial de dados.
-- `test`: testes de integracao e unitarios.
+- `builder`: montagem controlada de agregados complexos, como `Pedido`
+- `config`: configurações de logging, OpenAPI e infraestrutura
+- `controller`: endpoints REST e orquestração HTTP
+- `dto`: contratos de entrada e saída da API
+- `exception`: exceções de negócio e tratamento global de erros
+- `mapper`: conversão entre entidades e DTOs
+- `model`: entidades e enums do domínio
+- `repository`: acesso a dados com Spring Data JPA
+- `service`: contratos e implementações da regra de negócio
 
-## Aplicacao Do Padrao MVC
+## Padrões E Decisões Arquiteturais
 
-O projeto aplica o padrao MVC de forma adaptada ao contexto de API REST:
+### MVC
 
-- `Model`
-  - representado principalmente pela entidade `Cliente`
-  - define a estrutura do dominio persistido
+O projeto aplica o padrão `Model-View-Controller` adaptado ao contexto de API REST:
 
-- `Controller`
-  - representado por `ClienteController`
-  - recebe as requisicoes HTTP e devolve as respostas da API
+- `Model`: representado pelas entidades de domínio persistidas
+- `Controller`: responsável por receber requisições HTTP e devolver respostas JSON
+- `Service`: camada intermediária com a lógica de negócio
 
-- `Service`
-  - funciona como camada de negocio entre controller e persistencia
-  - concentra validacoes de fluxo, busca, atualizacao, exclusao e contagem
+Em APIs REST, a `View` tradicional não aparece como interface gráfica. O papel de apresentação é exercido pelos payloads JSON e pela documentação OpenAPI.
 
-Em uma API REST com Spring Boot, a camada `View` tradicional de interfaces graficas nao e utilizada. O papel de apresentacao e exercido pelo retorno JSON dos endpoints.
+### Repository
 
-## Decisoes Arquiteturais
+Foi adotado o padrão `Repository` por meio do Spring Data JPA. Essa decisão reduz acoplamento entre regra de negócio e persistência, centralizando operações de acesso a dados em contratos específicos.
 
-As principais decisoes adotadas no projeto foram:
+Justificativa técnica:
 
-- uso de Spring Boot
-  - acelera a construcao da API e reduz codigo de infraestrutura
+- melhora a coesão da camada de acesso a dados
+- evita SQL espalhado pela aplicação
+- facilita evolução da persistência
 
-- uso do padrao MVC
-  - facilita organizacao, manutencao e separacao de responsabilidades
+### DTO e Mapper
 
-- uso de DTOs
-  - evita expor diretamente a entidade JPA como contrato da API
-  - melhora clareza e controle do payload HTTP
+Foram utilizados `DTOs` e `Mappers` para desacoplar o contrato HTTP do modelo JPA.
 
-- uso de Spring Data JPA com H2
-  - simplifica a persistencia
-  - permite demonstracao local rapida sem dependencias externas
+Justificativa acadêmica e técnica:
 
-- uso de Swagger / OpenAPI
-  - melhora a documentacao e facilita validacao dos endpoints
+- evita expor entidades diretamente na API
+- reduz risco de acoplamento indevido entre persistência e interface
+- melhora controle sobre validação e serialização
 
-- uso de logs
-  - aumenta a observabilidade das requisicoes e erros da aplicacao
+### Service Layer
 
-- uso de testes automatizados
-  - reduz regressao e melhora confianca sobre os fluxos principais
+A camada de serviço concentra regras de negócio, como:
 
-- uso de Docker
-  - permite executar a aplicacao mesmo sem Java instalado na maquina do avaliador
+- cálculo do total do pedido
+- atribuição de status inicial
+- validação de existência de cliente e produto
+- bloqueio de exclusão por integridade de negócio
+
+Essa decisão reforça separação de responsabilidades e facilita manutenção, teste e reuso de regras.
+
+### Interfaces De Serviço E Inversão De Dependência
+
+Os controllers dependem de abstrações, como:
+
+- [ClienteService.java](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\src\main\java\br\com\posxp\clientesapi\service\ClienteService.java)
+- [ProdutoService.java](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\src\main\java\br\com\posxp\clientesapi\service\ProdutoService.java)
+- [PedidoService.java](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\src\main\java\br\com\posxp\clientesapi\service\PedidoService.java)
+
+com implementações concretas em:
+
+- [ClienteServiceImpl.java](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\src\main\java\br\com\posxp\clientesapi\service\ClienteServiceImpl.java)
+- [ProdutoServiceImpl.java](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\src\main\java\br\com\posxp\clientesapi\service\ProdutoServiceImpl.java)
+- [PedidoServiceImpl.java](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\src\main\java\br\com\posxp\clientesapi\service\PedidoServiceImpl.java)
+
+Isso caracteriza aplicação de `Dependency Inversion` na camada de serviços, pois módulos de mais alto nível dependem de contratos em vez de implementações específicas.
+
+### Builder
+
+Foi adotado o padrão `Builder` na construção de `Pedido`, por meio de [PedidoBuilder.java](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\src\main\java\br\com\posxp\clientesapi\builder\PedidoBuilder.java).
+
+Justificativa:
+
+- a entidade `Pedido` passou a ser um agregado com montagem mais complexa
+- a construção exige associar cliente, itens, subtotais, total e status
+- o builder centraliza essa montagem e reduz repetição na camada de serviço
+
+### Tratamento Centralizado De Exceções
+
+O tratamento global em [ApiExceptionHandler.java](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\src\main\java\br\com\posxp\clientesapi\exception\ApiExceptionHandler.java) padroniza respostas para:
+
+- `400 Bad Request`
+- `404 Not Found`
+- `409 Conflict`
+- `500 Internal Server Error`
+
+Essa abordagem melhora consistência da API e previsibilidade para consumidores.
+
+### Persistência Com H2 E Spring Data JPA
+
+Foi escolhida persistência em `H2` por se tratar de um trabalho acadêmico com foco em demonstração, simplicidade de execução e independência de infraestrutura externa.
+
+Justificativa:
+
+- permite executar o projeto sem instalação de banco adicional
+- acelera validação local e avaliação do projeto
+- preserva conceitos relacionais e integridade referencial
+
+### Observabilidade
+
+Foi incorporada uma camada enxuta de observabilidade com:
+
+- logs estruturados de controllers e services
+- logging de requisições HTTP
+- Spring Boot Actuator
+
+Essa decisão reforça boas práticas operacionais, permitindo inspeção de saúde, informações da aplicação e métricas.
 
 ## Artefatos De Arquitetura
 
-Os artefatos de documentacao arquitetural do projeto estao na pasta `doc`:
+Os artefatos de documentação arquitetural estão na pasta `doc`:
 
-- `doc/ENTREGAVEIS.md`
-- `doc/ARQUITETURA-C4.md`
-- `doc/Enunciado do Desafio Final - Arquiteto(a) de Software.pdf`
+- [ENTREGAVEIS.md](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\ENTREGAVEIS.md)
+- [ARQUITETURA-C4.md](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\ARQUITETURA-C4.md)
+- [Enunciado do Desafio Final - Arquiteto(a) de Software.pdf](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\Enunciado%20do%20Desafio%20Final%20-%20Arquiteto(a)%20de%20Software.pdf)
 
 ## Como Executar
 
-### Pre-requisitos
+### Pré-requisitos
 
 - Java 17 instalado
 - Maven 3.9+ instalado
 
-### Subir a aplicacao
+### Subir a aplicação
 
 ```bash
 mvn spring-boot:run
 ```
 
-Depois disso, a API ficara disponivel em:
-
-- `http://localhost:8080`
-
-### Gerar build do projeto
+### Build
 
 ```bash
 mvn clean package
 ```
 
-### Executar os testes
+### Testes
 
 ```bash
-mvn test
+mvn clean test
 ```
 
-## Executando com Docker
-
-Se o usuario nao tiver Java instalado localmente, a aplicacao tambem pode ser executada via Docker.
-
-Arquivos relacionados:
-
-- `Dockerfile`
-- `.dockerignore`
+## Executando Com Docker
 
 ### Gerar a imagem
 
@@ -195,147 +294,78 @@ docker build -t clientes-api .
 docker run --rm -p 8080:8080 clientes-api
 ```
 
-Depois disso, a aplicacao ficara disponivel em:
+### Endereços úteis
 
-- `http://localhost:8080`
 - `http://localhost:8080/swagger-ui.html`
+- `http://localhost:8080/v3/api-docs`
 - `http://localhost:8080/h2-console`
+- `http://localhost:8080/actuator/health`
 
-### Parar o container
-
-Se o container estiver rodando em primeiro plano, basta interromper com:
-
-```bash
-Ctrl + C
-```
-
-Se estiver rodando em background, use:
-
-```bash
-docker ps
-docker stop <container_id>
-```
-
-## Documentacao da API
-
-Com a aplicacao em execucao, a documentacao interativa pode ser acessada em:
+## Swagger E OpenAPI
 
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 
 ## Observabilidade
 
-O projeto utiliza Spring Boot Actuator para disponibilizar endpoints tecnicos de observabilidade.
+Endpoints técnicos habilitados:
 
-### Endpoints habilitados
+- `GET /actuator/health`
+- `GET /actuator/info`
+- `GET /actuator/metrics`
 
-- Health: `http://localhost:8080/actuator/health`
-- Info: `http://localhost:8080/actuator/info`
-- Metrics: `http://localhost:8080/actuator/metrics`
+## Collection Do Postman
 
-### Papel de cada endpoint
+O projeto possui uma collection pronta para importação:
 
-- `health`
-  - informa se a aplicacao esta saudavel
-  - util para verificar se a API subiu corretamente e se dependencias como o banco estao disponiveis
+- [Cliente-API.postman_collection.json](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\Cliente-API.postman_collection.json)
 
-- `info`
-  - expõe informacoes da aplicacao, como nome, descricao e versao
-  - util para identificacao do sistema
+Variável utilizada:
 
-- `metrics`
-  - expõe metricas tecnicas da aplicacao
-  - util para inspecionar comportamento de JVM, memoria e requisicoes HTTP
+- `{{baseUrl}} = http://localhost:8080`
 
-### Como acessar
+## Console H2
 
-Com a aplicacao rodando localmente ou via Docker, abra no navegador ou consulte via Postman:
-
-```http
-GET /actuator/health
-GET /actuator/info
-GET /actuator/metrics
-```
-
-## Console do Banco H2
-
-O console do banco em memoria pode ser acessado em:
-
-- `http://localhost:8080/h2-console`
-
-Parametros padrao:
-
+- URL: `http://localhost:8080/h2-console`
 - JDBC URL: `jdbc:h2:mem:clientesdb`
 - User: `sa`
 - Password: em branco
 
-## Collection do Postman
+## Endpoints Disponíveis
 
-O projeto possui uma collection pronta para importacao no Postman:
+### Clientes
 
-- `Cliente-API.postman_collection.json`
+- `GET /clientes`
+- `GET /clientes/{id}`
+- `GET /clientes/nome/{nome}`
+- `GET /clientes/contar`
+- `POST /clientes`
+- `PUT /clientes/{id}`
+- `DELETE /clientes/{id}`
 
-Essa collection contem as principais operacoes da API:
+### Produtos
 
-- listar clientes
-- buscar cliente por ID
-- buscar cliente por nome
-- contar clientes
-- criar cliente
-- atualizar cliente
-- excluir cliente
-- validar retorno de erro `400`
+- `GET /produtos`
+- `GET /produtos/{id}`
+- `GET /produtos/nome/{nome}`
+- `GET /produtos/contar`
+- `POST /produtos`
+- `PUT /produtos/{id}`
+- `DELETE /produtos/{id}`
 
-### Como usar no Postman
+### Pedidos
 
-1. Abra o Postman.
-2. Clique em `Import`.
-3. Selecione o arquivo `Cliente-API.postman_collection.json`.
-4. Garanta que a aplicacao esteja rodando em `http://localhost:8080`.
-5. Execute as requisicoes da pasta `Clientes`.
+- `GET /pedidos`
+- `GET /pedidos/{id}`
+- `GET /pedidos/status/{status}`
+- `GET /pedidos/contar`
+- `POST /pedidos`
+- `PUT /pedidos/{id}`
+- `DELETE /pedidos/{id}`
 
-### Variavel utilizada na collection
+## Exemplos De Payload
 
-A collection usa a variavel:
-
-- `{{baseUrl}} = http://localhost:8080`
-
-Se a aplicacao estiver rodando em outra porta ou host, basta alterar essa variavel no Postman.
-
-## Endpoints Disponiveis
-
-### Listar todos os clientes
-
-```http
-GET /clientes
-```
-
-### Buscar cliente por ID
-
-```http
-GET /clientes/{id}
-```
-
-### Buscar clientes por nome
-
-```http
-GET /clientes/nome/{nome}
-```
-
-### Contar clientes
-
-```http
-GET /clientes/contar
-```
-
-### Criar cliente
-
-```http
-POST /clientes
-Content-Type: application/json
-```
-
-Exemplo de payload:
+### Criar Cliente
 
 ```json
 {
@@ -344,67 +374,67 @@ Exemplo de payload:
 }
 ```
 
-### Atualizar cliente
-
-```http
-PUT /clientes/{id}
-Content-Type: application/json
-```
-
-Exemplo de payload:
+### Criar Produto
 
 ```json
 {
-  "nome": "Maria Oliveira Atualizada",
-  "email": "maria.atualizada@exemplo.com"
+  "nome": "Teclado",
+  "descricao": "Teclado mecanico",
+  "preco": 350.00
 }
 ```
 
-### Excluir cliente
-
-```http
-DELETE /clientes/{id}
-```
-
-## Respostas e Tratamento de Erros
-
-A API retorna payload JSON consistente para erros.
-
-Exemplos de cenarios tratados:
-
-- `400 Bad Request` para dados invalidos
-- `404 Not Found` para cliente inexistente
-- `409 Conflict` para email duplicado
-- `500 Internal Server Error` para erros inesperados
-
-Exemplo de resposta de erro:
+### Criar Pedido
 
 ```json
 {
-  "timestamp": "2026-03-24T23:00:00",
-  "status": 404,
-  "error": "Not Found",
-  "message": "Cliente com id 999 nao encontrado.",
-  "path": "/clientes/999",
+  "clienteId": 2,
+  "itens": [
+    { "produtoId": 2, "quantidade": 2 },
+    { "produtoId": 3, "quantidade": 1 }
+  ]
+}
+```
+
+## Tratamento De Erros
+
+A API retorna payload JSON consistente para cenários de falha.
+
+Exemplo:
+
+```json
+{
+  "timestamp": "2026-03-25T21:00:00",
+  "status": 409,
+  "error": "Conflict",
+  "message": "Produto nao pode ser removido porque possui itens de pedido associados.",
+  "path": "/produtos/1",
   "validations": null
 }
 ```
 
 ## Dados Iniciais
 
-Ao iniciar a aplicacao, a base H2 recebe alguns registros para demonstracao:
+Ao iniciar a aplicação, a base H2 recebe:
 
-- Ana Silva
-- Bruno Costa
-- Carla Souza
+- `100` clientes
+- `100` produtos
+- `10` pedidos
+- `50` itens de pedido
 
-## Qualidade e Observabilidade
+Essa massa permite demonstrar:
+
+- listagens mais realistas
+- relações entre entidades
+- bloqueios de exclusão por integridade de negócio
+
+## Qualidade Do Projeto
 
 O projeto possui:
 
-- logs de requisicao HTTP
-- logs de operacoes da API
-- logs de validacao e tratamento de excecao
-- testes de integracao com MockMvc
-- testes unitarios de service, mapper e configuracao
-- relatorio de cobertura com JaCoCo em `target/site/jacoco/index.html`
+- logs de requisição HTTP
+- logs de operações de negócio
+- tratamento padronizado de erros
+- testes de integração com MockMvc
+- testes unitários de service, mapper e configuração
+- cobertura com JaCoCo em `target/site/jacoco/index.html`
