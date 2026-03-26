@@ -1,0 +1,24 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_TOP_DOWN()
+
+title Sistema de Pedidos - Diagrama de Containers
+
+Person(usuario, "Usuário / Avaliador", "Consome a API e sua documentação.")
+
+System_Boundary(boundary_api, "Clientes API") {
+    Container(api, "Aplicação Spring Boot", "Java 17, Spring Boot 3", "Expõe endpoints REST, aplica regras de negócio, HATEOAS, validação, observabilidade e documentação OpenAPI.")
+    Container(swagger, "Swagger UI / OpenAPI", "springdoc-openapi", "Documenta e permite explorar os endpoints da API.")
+    Container(actuator, "Actuator", "Spring Boot Actuator", "Expõe health checks, info e métricas da aplicação.")
+    ContainerDb(h2, "Banco H2", "H2 Database", "Armazena clientes, produtos, pedidos e itens de pedido.")
+}
+
+Rel(usuario, api, "Consome", "HTTP/JSON")
+Rel(usuario, swagger, "Acessa", "HTTP")
+Rel(usuario, actuator, "Consulta", "HTTP")
+Rel(swagger, api, "Lê contrato OpenAPI", "/v3/api-docs")
+Rel(api, h2, "Lê e grava dados", "JPA / Hibernate")
+Rel(actuator, api, "Monitora", "Endpoints de gestão")
+
+@enduml
