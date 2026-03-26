@@ -2,6 +2,7 @@ package br.com.posxp.clientesapi.service;
 
 import br.com.posxp.clientesapi.model.Cliente;
 import br.com.posxp.clientesapi.repository.ClienteRepository;
+import br.com.posxp.clientesapi.repository.PedidoRepository;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -12,9 +13,11 @@ import org.springframework.stereotype.Service;
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
+    private final PedidoRepository pedidoRepository;
 
-    public ClienteService(ClienteRepository clienteRepository) {
+    public ClienteService(ClienteRepository clienteRepository, PedidoRepository pedidoRepository) {
         this.clienteRepository = clienteRepository;
+        this.pedidoRepository = pedidoRepository;
     }
 
     public List<Cliente> listarTodos() {
@@ -49,6 +52,11 @@ public class ClienteService {
     public void deletar(Long id) {
         log.debug("Removendo cliente id={}.", id);
         Cliente cliente = buscarPorId(id);
+        if (pedidoRepository.existsByClienteId(id)) {
+            throw new OperacaoNaoPermitidaException(
+                    "Cliente nao pode ser removido porque possui pedidos associados."
+            );
+        }
         clienteRepository.delete(cliente);
     }
 

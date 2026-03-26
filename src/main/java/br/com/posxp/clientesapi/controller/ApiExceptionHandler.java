@@ -1,6 +1,7 @@
 package br.com.posxp.clientesapi.controller;
 
 import br.com.posxp.clientesapi.dto.ErroResponse;
+import br.com.posxp.clientesapi.service.OperacaoNaoPermitidaException;
 import br.com.posxp.clientesapi.service.RecursoNaoEncontradoException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -27,6 +28,15 @@ public class ApiExceptionHandler {
     ) {
         log.warn("Recurso nao encontrado. path={}, message={}", request.getRequestURI(), ex.getMessage());
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI(), null);
+    }
+
+    @ExceptionHandler(OperacaoNaoPermitidaException.class)
+    public ResponseEntity<ErroResponse> handleBusinessConflict(
+            OperacaoNaoPermitidaException ex,
+            HttpServletRequest request
+    ) {
+        log.warn("Operacao nao permitida. path={}, message={}", request.getRequestURI(), ex.getMessage());
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI(), null);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

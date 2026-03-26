@@ -1,6 +1,7 @@
 package br.com.posxp.clientesapi.service;
 
 import br.com.posxp.clientesapi.model.Produto;
+import br.com.posxp.clientesapi.repository.ItemPedidoRepository;
 import br.com.posxp.clientesapi.repository.ProdutoRepository;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +13,11 @@ import org.springframework.stereotype.Service;
 public class ProdutoService {
 
     private final ProdutoRepository produtoRepository;
+    private final ItemPedidoRepository itemPedidoRepository;
 
-    public ProdutoService(ProdutoRepository produtoRepository) {
+    public ProdutoService(ProdutoRepository produtoRepository, ItemPedidoRepository itemPedidoRepository) {
         this.produtoRepository = produtoRepository;
+        this.itemPedidoRepository = itemPedidoRepository;
     }
 
     public List<Produto> listarTodos() {
@@ -50,6 +53,11 @@ public class ProdutoService {
     public void deletar(Long id) {
         log.debug("Removendo produto id={}.", id);
         Produto produto = buscarPorId(id);
+        if (itemPedidoRepository.existsByProdutoId(id)) {
+            throw new OperacaoNaoPermitidaException(
+                    "Produto nao pode ser removido porque possui itens de pedido associados."
+            );
+        }
         produtoRepository.delete(produto);
     }
 
@@ -58,4 +66,3 @@ public class ProdutoService {
         return produtoRepository.count();
     }
 }
-

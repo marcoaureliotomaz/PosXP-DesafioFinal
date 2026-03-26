@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import br.com.posxp.clientesapi.model.Produto;
+import br.com.posxp.clientesapi.repository.ItemPedidoRepository;
 import br.com.posxp.clientesapi.repository.ProdutoRepository;
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,6 +27,9 @@ class ProdutoServiceTest {
 
     @Mock
     private ProdutoRepository produtoRepository;
+
+    @Mock
+    private ItemPedidoRepository itemPedidoRepository;
 
     @InjectMocks
     private ProdutoService produtoService;
@@ -109,6 +113,7 @@ class ProdutoServiceTest {
     @Test
     void deveDeletarProdutoExistente() {
         when(produtoRepository.findById(1L)).thenReturn(Optional.of(produto));
+        when(itemPedidoRepository.existsByProdutoId(1L)).thenReturn(false);
 
         produtoService.deletar(1L);
 
@@ -125,6 +130,20 @@ class ProdutoServiceTest {
     }
 
     @Test
+    void naoDeveDeletarProdutoQuandoPossuirItensDePedidoAssociados() {
+        when(produtoRepository.findById(1L)).thenReturn(Optional.of(produto));
+        when(itemPedidoRepository.existsByProdutoId(1L)).thenReturn(true);
+
+        OperacaoNaoPermitidaException ex = assertThrows(
+                OperacaoNaoPermitidaException.class,
+                () -> produtoService.deletar(1L)
+        );
+
+        assertEquals("Produto nao pode ser removido porque possui itens de pedido associados.", ex.getMessage());
+        verify(produtoRepository, never()).delete(any());
+    }
+
+    @Test
     void deveContarProdutos() {
         when(produtoRepository.count()).thenReturn(3L);
 
@@ -134,4 +153,3 @@ class ProdutoServiceTest {
         verify(produtoRepository).count();
     }
 }
-

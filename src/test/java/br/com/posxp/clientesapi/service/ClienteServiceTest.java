@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import br.com.posxp.clientesapi.model.Cliente;
 import br.com.posxp.clientesapi.repository.ClienteRepository;
+import br.com.posxp.clientesapi.repository.PedidoRepository;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +26,9 @@ class ClienteServiceTest {
 
     @Mock
     private ClienteRepository clienteRepository;
+
+    @Mock
+    private PedidoRepository pedidoRepository;
 
     @InjectMocks
     private ClienteService clienteService;
@@ -107,6 +111,7 @@ class ClienteServiceTest {
     @Test
     void deveDeletarClienteExistente() {
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
+        when(pedidoRepository.existsByClienteId(1L)).thenReturn(false);
 
         clienteService.deletar(1L);
 
@@ -123,6 +128,20 @@ class ClienteServiceTest {
     }
 
     @Test
+    void naoDeveDeletarClienteQuandoPossuirPedidosAssociados() {
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
+        when(pedidoRepository.existsByClienteId(1L)).thenReturn(true);
+
+        OperacaoNaoPermitidaException ex = assertThrows(
+                OperacaoNaoPermitidaException.class,
+                () -> clienteService.deletar(1L)
+        );
+
+        assertEquals("Cliente nao pode ser removido porque possui pedidos associados.", ex.getMessage());
+        verify(clienteRepository, never()).delete(any());
+    }
+
+    @Test
     void deveContarClientes() {
         when(clienteRepository.count()).thenReturn(3L);
 
@@ -132,4 +151,3 @@ class ClienteServiceTest {
         verify(clienteRepository).count();
     }
 }
-

@@ -109,6 +109,14 @@ class ClienteControllerTest {
     }
 
     @Test
+    void deveRetornar409AoExcluirClienteComPedidosAssociados() throws Exception {
+        mockMvc.perform(delete("/clientes/1"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status", is(409)))
+                .andExpect(jsonPath("$.message", is("Cliente nao pode ser removido porque possui pedidos associados.")));
+    }
+
+    @Test
     void deveValidarPayloadInvalido() throws Exception {
         String payload = """
                 {
