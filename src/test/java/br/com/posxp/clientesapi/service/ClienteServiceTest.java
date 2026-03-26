@@ -33,7 +33,7 @@ class ClienteServiceTest {
     private PedidoRepository pedidoRepository;
 
     @InjectMocks
-    private ClienteService clienteService;
+    private ClienteServiceImpl clienteService;
 
     private Cliente cliente;
 
