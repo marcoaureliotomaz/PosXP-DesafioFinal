@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Este documento descreve a arquitetura da solução em formato textual, servindo como base para a criação do diagrama em draw.io.
+Este documento descreve a arquitetura da solução em formato textual, servindo como base para os diagramas C4 exportados em `.png` e para os fontes em Mermaid e PlantUML.
 
 ## Nível 1 - Contexto
 

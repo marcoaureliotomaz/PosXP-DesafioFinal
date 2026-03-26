@@ -1,0 +1,11 @@
+sequenceDiagram
+    actor Usuario
+    participant ClienteController
+    participant Validation as Bean Validation
+    participant ApiExceptionHandler
+
+    Usuario->>ClienteController: POST /clientes\npayload inválido
+    ClienteController->>Validation: validar ClienteRequest
+    Validation-->>ClienteController: MethodArgumentNotValidException
+    ClienteController->>ApiExceptionHandler: trata exceção
+    ApiExceptionHandler-->>Usuario: 400 Bad Request\nErroResponse + validations

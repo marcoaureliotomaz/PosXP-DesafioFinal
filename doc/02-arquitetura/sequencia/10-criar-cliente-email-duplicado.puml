@@ -1,0 +1,24 @@
+@startuml
+title Criar Cliente Com Email Duplicado
+
+actor Usuario
+participant ClienteController
+participant ClienteMapper
+participant ClienteServiceImpl
+participant ClienteRepository
+participant H2
+participant ApiExceptionHandler
+
+Usuario -> ClienteController : POST /clientes\nClienteRequest com email existente
+ClienteController -> ClienteMapper : toEntity(request)
+ClienteMapper --> ClienteController : Cliente
+ClienteController -> ClienteServiceImpl : salvar(cliente)
+ClienteServiceImpl -> ClienteRepository : save(cliente)
+ClienteRepository -> H2 : INSERT cliente
+H2 --> ClienteRepository : erro de unicidade no email
+ClienteRepository --> ClienteServiceImpl : DataIntegrityViolationException
+ClienteServiceImpl --> ClienteController : propaga excecao
+ClienteController -> ApiExceptionHandler : trata excecao
+ApiExceptionHandler --> Usuario : 409 Conflict\nErroResponse
+
+@enduml

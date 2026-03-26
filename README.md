@@ -207,14 +207,14 @@ Foi incorporado HATEOAS nas respostas dos recursos principais com Spring HATEOAS
 
 As respostas agora expõem links navegaveis para:
 
-- o proprio recurso (`self`)
-- a colecao do recurso
+- o próprio recurso (`self`)
+- a coleção do recurso
 - recursos relacionados, como o cliente associado a um pedido
 
-Justificativa tecnica e academica:
+Justificativa técnica e acadêmica:
 
-- reforca aderencia ao estilo REST
-- reduz dependencia do cliente em URIs fixas conhecidas previamente
+- reforça aderência ao estilo REST
+- reduz dependência do cliente em URIs fixas conhecidas previamente
 - melhora descoberta de recursos
 - torna o contrato HTTP mais expressivo e evolutivo
 
@@ -286,14 +286,14 @@ Foi incorporada uma camada enxuta de observabilidade com:
 
 Essa decisão reforça boas práticas operacionais, permitindo inspeção de saúde, informações da aplicação e métricas.
 
-### Beneficios Arquiteturais Do HATEOAS
+### Benefícios Arquiteturais Do HATEOAS
 
 - melhora navegabilidade entre recursos da API
 - reduz acoplamento entre consumidor e estrutura interna de rotas
-- facilita evolucao futura da API com menor impacto para clientes
-- torna a API mais aderente a um modelo REST rico em hipermidia
+- facilita evolução futura da API com menor impacto para clientes
+- torna a API mais aderente a um modelo REST rico em hipermídia
 
-## Analise De Aderencia Ao Estilo RESTful
+## Análise De Aderência Ao Estilo RESTful
 
 A aplicação pode ser considerada uma API REST em sentido prático e está próxima de uma API RESTful mais completa.
 
@@ -316,7 +316,7 @@ A aplicação pode ser considerada uma API REST em sentido prático e está pró
 - a API não implementa negociação avançada de mídia além do suporte JSON/HAL básico
 - não há versionamento explícito de API, o que é comum em APIs REST maduras
 
-### Conclusao
+### Conclusão
 
 A API adota os princípios centrais de uma solução RESTful e se encontra em um nível alto de aderência para uso acadêmico e profissional comum. Ainda assim, algumas decisões de design foram mantidas de forma pragmática para privilegiar clareza, simplicidade de consumo e objetividade da entrega.
 
@@ -326,6 +326,20 @@ Os artefatos de documentação arquitetural estão na pasta `doc`:
 
 - [ENTREGAVEIS.md](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\03-entrega\ENTREGAVEIS.md)
 - [ARQUITETURA-C4.md](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\ARQUITETURA-C4.md)
+- [arquitetura-contexto.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\arquitetura-contexto.png)
+- [arquitetura-containers.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\arquitetura-containers.png)
+- [arquitetura-componentes.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\arquitetura-componentes.png)
+- [sequencia](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia)
+- [01-criar-cliente.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\01-criar-cliente.png)
+- [02-criar-produto.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\02-criar-produto.png)
+- [03-criar-pedido.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\03-criar-pedido.png)
+- [04-atualizar-pedido.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\04-atualizar-pedido.png)
+- [05-listar-clientes-paginado.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\05-listar-clientes-paginado.png)
+- [06-excluir-cliente-bloqueado.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\06-excluir-cliente-bloqueado.png)
+- [07-excluir-produto-bloqueado.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\07-excluir-produto-bloqueado.png)
+- [08-sort-invalido.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\08-sort-invalido.png)
+- [09-validacao-payload-invalido.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\09-validacao-payload-invalido.png)
+- [10-criar-cliente-email-duplicado.png](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\02-arquitetura\sequencia\10-criar-cliente-email-duplicado.png)
 - [Enunciado do Desafio Final - Arquiteto(a) de Software.pdf](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\doc\01-enunciado\Enunciado%20do%20Desafio%20Final%20-%20Arquiteto(a)%20de%20Software.pdf)
 
 ## Como Executar
@@ -426,9 +440,37 @@ O projeto possui uma collection pronta para importação:
 
 - [Cliente-API.postman_collection.json](c:\Gryphem\Projetos\PosXP\PosXP-DesafioFinal\Cliente-API.postman_collection.json)
 
-Variável utilizada:
+Cobertura da collection:
 
 - `{{baseUrl}} = http://localhost:8080`
+- pasta `Clientes` com CRUD, busca por nome, contagem, paginação e cenários de erro
+- pasta `Produtos` com CRUD, busca por nome, contagem, paginação e cenários de erro
+- pasta `Pedidos` com CRUD, busca por status, contagem, paginação e cenários de erro
+
+Variáveis utilizadas:
+
+- `{{baseUrl}}`
+- `{{clienteCriadoId}}`
+- `{{produtoCriadoId}}`
+- `{{pedidoCriadoId}}`
+
+Comportamento da collection:
+
+- os requests `Criar Cliente`, `Criar Produto` e `Criar Pedido` salvam automaticamente o ID criado nas variáveis da collection
+- os requests `Atualizar ... Criado` e `Excluir ... Criado` dependem dessas variáveis e devem ser executados após o respectivo `POST`
+- o `POST /clientes` usa email dinâmico com `{{$timestamp}}` para permitir reexecução sem conflito de unicidade
+
+Ordem recomendada para demonstração:
+
+1. executar as listagens, buscas e contagens
+2. executar o `POST` de cada domínio
+3. executar o `PUT` e o `DELETE` do recurso recém-criado
+4. executar os cenários negativos de `400`, `404`, `409` e `sort` inválido
+
+Validação realizada:
+
+- a collection foi executada contra a aplicação local em `2026-03-26`
+- todos os fluxos testados retornaram o status esperado, incluindo `200`, `201`, `204`, `400`, `404` e `409`
 
 ## Console H2
 
@@ -522,7 +564,7 @@ As respostas de recursos individuais incluem `_links` e as respostas de coleçã
 }
 ```
 
-### Exemplo De Colecao
+### Exemplo De Coleção
 
 ```json
 {

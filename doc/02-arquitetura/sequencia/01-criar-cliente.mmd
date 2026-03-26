@@ -1,0 +1,20 @@
+sequenceDiagram
+    actor Usuario
+    participant ClienteController
+    participant ClienteMapper
+    participant ClienteServiceImpl
+    participant ClienteRepository
+    participant H2 as Banco H2
+
+    Usuario->>ClienteController: POST /clientes\nClienteRequest
+    ClienteController->>ClienteMapper: toEntity(request)
+    ClienteMapper-->>ClienteController: Cliente
+    ClienteController->>ClienteServiceImpl: salvar(cliente)
+    ClienteServiceImpl->>ClienteRepository: save(cliente)
+    ClienteRepository->>H2: INSERT cliente
+    H2-->>ClienteRepository: cliente persistido
+    ClienteRepository-->>ClienteServiceImpl: Cliente
+    ClienteServiceImpl-->>ClienteController: Cliente
+    ClienteController->>ClienteMapper: toResponse(cliente)
+    ClienteMapper-->>ClienteController: ClienteResponse + links
+    ClienteController-->>Usuario: 201 Created\nLocation + payload HAL
