@@ -14,7 +14,8 @@ import br.com.posxp.clientesapi.repository.ProdutoRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,9 +39,10 @@ public class PedidoServiceImpl implements PedidoService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Pedido> listarTodos() {
-        log.debug("Consultando todos os pedidos ordenados por id.");
-        return pedidoRepository.findAllWithDetalhes(Sort.by(Sort.Direction.ASC, "id"));
+    public Page<Pedido> listarTodos(Pageable pageable) {
+        log.debug("Consultando pedidos paginados. page={}, size={}, sort={}.",
+                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+        return pedidoRepository.findAllWithDetalhes(pageable);
     }
 
     @Override
@@ -53,9 +55,10 @@ public class PedidoServiceImpl implements PedidoService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Pedido> buscarPorStatus(PedidoStatus status) {
-        log.debug("Consultando pedidos por status={}.", status);
-        return pedidoRepository.findByStatusWithDetalhes(status, Sort.by(Sort.Direction.ASC, "id"));
+    public Page<Pedido> buscarPorStatus(PedidoStatus status, Pageable pageable) {
+        log.debug("Consultando pedidos por status={}. page={}, size={}.",
+                status, pageable.getPageNumber(), pageable.getPageSize());
+        return pedidoRepository.findByStatusWithDetalhes(status, pageable);
     }
 
     @Override

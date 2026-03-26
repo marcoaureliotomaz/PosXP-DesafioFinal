@@ -1,15 +1,16 @@
 package br.com.posxp.clientesapi.service;
 
 import br.com.posxp.clientesapi.model.Produto;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ProdutoService {
 
-    List<Produto> listarTodos();
+    Page<Produto> listarTodos(Pageable pageable);
 
     Produto buscarPorId(Long id);
 
-    List<Produto> buscarPorNome(String nome);
+    Page<Produto> buscarPorNome(String nome, Pageable pageable);
 
     Produto salvar(Produto produto);
 

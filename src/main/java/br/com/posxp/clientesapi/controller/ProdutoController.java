@@ -14,8 +14,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,13 +45,13 @@ public class ProdutoController {
 
     @GetMapping
     @Operation(summary = "Listar todos os produtos", description = "Retorna todos os produtos cadastrados na base.")
-    public ResponseEntity<List<ProdutoResponse>> listarTodos() {
+    public ResponseEntity<PagedModel<ProdutoResponse>> listarTodos(
+            @PageableDefault(size = 10, sort = "id") Pageable pageable
+    ) {
         log.info("Recebida requisicao para listar todos os produtos.");
-        List<ProdutoResponse> produtos = produtoService.listarTodos().stream()
-                .map(ProdutoMapper::toResponse)
-                .toList();
-        log.info("Listagem concluida com {} produto(s).", produtos.size());
-        return ResponseEntity.ok(produtos);
+        Page<ProdutoResponse> produtos = produtoService.listarTodos(pageable).map(ProdutoMapper::toResponse);
+        log.info("Listagem concluida com {} produto(s) na pagina {}.", produtos.getNumberOfElements(), produtos.getNumber());
+        return ResponseEntity.ok(toPagedModel(produtos));
     }
 
     @GetMapping("/{id}")
@@ -65,13 +69,14 @@ public class ProdutoController {
 
     @GetMapping("/nome/{nome}")
     @Operation(summary = "Buscar produtos por nome", description = "Retorna os produtos cujo nome contenha o valor informado.")
-    public ResponseEntity<List<ProdutoResponse>> buscarPorNome(@PathVariable String nome) {
+    public ResponseEntity<PagedModel<ProdutoResponse>> buscarPorNome(
+            @PathVariable String nome,
+            @PageableDefault(size = 10, sort = "id") Pageable pageable
+    ) {
         log.info("Recebida requisicao para buscar produtos por nome: {}.", nome);
-        List<ProdutoResponse> produtos = produtoService.buscarPorNome(nome).stream()
-                .map(ProdutoMapper::toResponse)
-                .toList();
-        log.info("Busca por nome '{}' retornou {} produto(s).", nome, produtos.size());
-        return ResponseEntity.ok(produtos);
+        Page<ProdutoResponse> produtos = produtoService.buscarPorNome(nome, pageable).map(ProdutoMapper::toResponse);
+        log.info("Busca por nome '{}' retornou {} produto(s) na pagina {}.", nome, produtos.getNumberOfElements(), produtos.getNumber());
+        return ResponseEntity.ok(toPagedModel(produtos));
     }
 
     @GetMapping("/contar")
@@ -132,5 +137,39 @@ public class ProdutoController {
         produtoService.deletar(id);
         log.info("Produto removido com sucesso. id={}.", id);
         return ResponseEntity.noContent().build();
+    }
+
+    private PagedModel<ProdutoResponse> toPagedModel(Page<ProdutoResponse> page) {
+        PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(
+                page.getSize(),
+                page.getNumber(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
+        PagedModel<ProdutoResponse> pagedModel = PagedModel.of(page.getContent(), metadata);
+
+        pagedModel.add(Link.of(ServletUriComponentsBuilder.fromCurrentRequest().toUriString(), "self"));
+
+        if (page.hasNext()) {
+            pagedModel.add(Link.of(
+                    ServletUriComponentsBuilder.fromCurrentRequest()
+                            .replaceQueryParam("page", page.getNumber() + 1)
+                            .replaceQueryParam("size", page.getSize())
+                            .toUriString(),
+                    "next"
+            ));
+        }
+
+        if (page.hasPrevious()) {
+            pagedModel.add(Link.of(
+                    ServletUriComponentsBuilder.fromCurrentRequest()
+                            .replaceQueryParam("page", page.getNumber() - 1)
+                            .replaceQueryParam("size", page.getSize())
+                            .toUriString(),
+                    "prev"
+            ));
+        }
+
+        return pagedModel;
     }
 }

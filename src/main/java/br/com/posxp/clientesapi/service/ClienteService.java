@@ -1,15 +1,16 @@
 package br.com.posxp.clientesapi.service;
 
 import br.com.posxp.clientesapi.model.Cliente;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ClienteService {
 
-    List<Cliente> listarTodos();
+    Page<Cliente> listarTodos(Pageable pageable);
 
     Cliente buscarPorId(Long id);
 
-    List<Cliente> buscarPorNome(String nome);
+    Page<Cliente> buscarPorNome(String nome, Pageable pageable);
 
     Cliente salvar(Cliente cliente);
 

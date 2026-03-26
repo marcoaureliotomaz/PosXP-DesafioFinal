@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -83,6 +85,24 @@ public class ApiExceptionHandler {
         );
     }
 
+    @ExceptionHandler({
+            PropertyReferenceException.class,
+            InvalidDataAccessApiUsageException.class,
+            IllegalArgumentException.class
+    })
+    public ResponseEntity<ErroResponse> handleInvalidSort(
+            Exception ex,
+            HttpServletRequest request
+    ) {
+        if (!isInvalidSortException(ex)) {
+            throw ex instanceof RuntimeException runtimeException ? runtimeException : new RuntimeException(ex);
+        }
+
+        String message = "Parametro de ordenacao invalido. Utilize campos validos, por exemplo sort=id,asc.";
+        log.warn("Parametro de ordenacao invalido. path={}, cause={}", request.getRequestURI(), ex.getMessage());
+        return buildResponse(HttpStatus.BAD_REQUEST, message, request.getRequestURI(), null);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErroResponse> handleGeneric(
             Exception ex,
@@ -95,6 +115,25 @@ public class ApiExceptionHandler {
                 request.getRequestURI(),
                 null
         );
+    }
+
+    private boolean isInvalidSortException(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof PropertyReferenceException) {
+                return true;
+            }
+            String message = current.getMessage();
+            if (message != null && (
+                    message.contains("Could not resolve attribute") ||
+                    message.contains("No property") ||
+                    message.contains("order by p.string")
+            )) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
     private ResponseEntity<ErroResponse> buildResponse(

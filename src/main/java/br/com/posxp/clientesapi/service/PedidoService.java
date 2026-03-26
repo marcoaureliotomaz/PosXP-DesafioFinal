@@ -3,15 +3,16 @@ package br.com.posxp.clientesapi.service;
 import br.com.posxp.clientesapi.dto.PedidoRequest;
 import br.com.posxp.clientesapi.model.Pedido;
 import br.com.posxp.clientesapi.model.PedidoStatus;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface PedidoService {
 
-    List<Pedido> listarTodos();
+    Page<Pedido> listarTodos(Pageable pageable);
 
     Pedido buscarPorId(Long id);
 
-    List<Pedido> buscarPorStatus(PedidoStatus status);
+    Page<Pedido> buscarPorStatus(PedidoStatus status, Pageable pageable);
 
     Pedido salvar(PedidoRequest request);
 

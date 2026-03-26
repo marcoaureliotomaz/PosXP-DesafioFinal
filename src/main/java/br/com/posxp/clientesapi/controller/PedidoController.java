@@ -15,8 +15,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,13 +46,13 @@ public class PedidoController {
 
     @GetMapping
     @Operation(summary = "Listar todos os pedidos", description = "Retorna todos os pedidos cadastrados na base.")
-    public ResponseEntity<List<PedidoResponse>> listarTodos() {
+    public ResponseEntity<PagedModel<PedidoResponse>> listarTodos(
+            @PageableDefault(size = 10, sort = "id") Pageable pageable
+    ) {
         log.info("Recebida requisicao para listar todos os pedidos.");
-        List<PedidoResponse> pedidos = pedidoService.listarTodos().stream()
-                .map(PedidoMapper::toResponse)
-                .toList();
-        log.info("Listagem concluida com {} pedido(s).", pedidos.size());
-        return ResponseEntity.ok(pedidos);
+        Page<PedidoResponse> pedidos = pedidoService.listarTodos(pageable).map(PedidoMapper::toResponse);
+        log.info("Listagem concluida com {} pedido(s) na pagina {}.", pedidos.getNumberOfElements(), pedidos.getNumber());
+        return ResponseEntity.ok(toPagedModel(pedidos));
     }
 
     @GetMapping("/{id}")
@@ -66,13 +70,14 @@ public class PedidoController {
 
     @GetMapping("/status/{status}")
     @Operation(summary = "Buscar pedidos por status", description = "Retorna os pedidos com o status informado.")
-    public ResponseEntity<List<PedidoResponse>> buscarPorStatus(@PathVariable PedidoStatus status) {
+    public ResponseEntity<PagedModel<PedidoResponse>> buscarPorStatus(
+            @PathVariable PedidoStatus status,
+            @PageableDefault(size = 10, sort = "id") Pageable pageable
+    ) {
         log.info("Recebida requisicao para buscar pedidos por status: {}.", status);
-        List<PedidoResponse> pedidos = pedidoService.buscarPorStatus(status).stream()
-                .map(PedidoMapper::toResponse)
-                .toList();
-        log.info("Busca por status '{}' retornou {} pedido(s).", status, pedidos.size());
-        return ResponseEntity.ok(pedidos);
+        Page<PedidoResponse> pedidos = pedidoService.buscarPorStatus(status, pageable).map(PedidoMapper::toResponse);
+        log.info("Busca por status '{}' retornou {} pedido(s) na pagina {}.", status, pedidos.getNumberOfElements(), pedidos.getNumber());
+        return ResponseEntity.ok(toPagedModel(pedidos));
     }
 
     @GetMapping("/contar")
@@ -135,5 +140,39 @@ public class PedidoController {
         pedidoService.deletar(id);
         log.info("Pedido removido com sucesso. id={}.", id);
         return ResponseEntity.noContent().build();
+    }
+
+    private PagedModel<PedidoResponse> toPagedModel(Page<PedidoResponse> page) {
+        PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(
+                page.getSize(),
+                page.getNumber(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
+        PagedModel<PedidoResponse> pagedModel = PagedModel.of(page.getContent(), metadata);
+
+        pagedModel.add(Link.of(ServletUriComponentsBuilder.fromCurrentRequest().toUriString(), "self"));
+
+        if (page.hasNext()) {
+            pagedModel.add(Link.of(
+                    ServletUriComponentsBuilder.fromCurrentRequest()
+                            .replaceQueryParam("page", page.getNumber() + 1)
+                            .replaceQueryParam("size", page.getSize())
+                            .toUriString(),
+                    "next"
+            ));
+        }
+
+        if (page.hasPrevious()) {
+            pagedModel.add(Link.of(
+                    ServletUriComponentsBuilder.fromCurrentRequest()
+                            .replaceQueryParam("page", page.getNumber() - 1)
+                            .replaceQueryParam("size", page.getSize())
+                            .toUriString(),
+                    "prev"
+            ));
+        }
+
+        return pagedModel;
     }
 }

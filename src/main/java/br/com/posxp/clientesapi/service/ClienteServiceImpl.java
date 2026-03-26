@@ -5,9 +5,9 @@ import br.com.posxp.clientesapi.exception.RecursoNaoEncontradoException;
 import br.com.posxp.clientesapi.model.Cliente;
 import br.com.posxp.clientesapi.repository.ClienteRepository;
 import br.com.posxp.clientesapi.repository.PedidoRepository;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -23,9 +23,10 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     @Override
-    public List<Cliente> listarTodos() {
-        log.debug("Consultando todos os clientes ordenados por id.");
-        return clienteRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+    public Page<Cliente> listarTodos(Pageable pageable) {
+        log.debug("Consultando clientes paginados. page={}, size={}, sort={}.",
+                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+        return clienteRepository.findAll(pageable);
     }
 
     @Override
@@ -36,9 +37,10 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     @Override
-    public List<Cliente> buscarPorNome(String nome) {
-        log.debug("Consultando clientes por nome contendo '{}'.", nome);
-        return clienteRepository.findByNomeContainingIgnoreCase(nome);
+    public Page<Cliente> buscarPorNome(String nome, Pageable pageable) {
+        log.debug("Consultando clientes por nome contendo '{}'. page={}, size={}.",
+                nome, pageable.getPageNumber(), pageable.getPageSize());
+        return clienteRepository.findByNomeContainingIgnoreCase(nome, pageable);
     }
 
     @Override

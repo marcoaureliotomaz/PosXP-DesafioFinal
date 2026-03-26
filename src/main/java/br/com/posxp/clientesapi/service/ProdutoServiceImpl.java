@@ -5,9 +5,9 @@ import br.com.posxp.clientesapi.exception.RecursoNaoEncontradoException;
 import br.com.posxp.clientesapi.model.Produto;
 import br.com.posxp.clientesapi.repository.ItemPedidoRepository;
 import br.com.posxp.clientesapi.repository.ProdutoRepository;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -23,9 +23,10 @@ public class ProdutoServiceImpl implements ProdutoService {
     }
 
     @Override
-    public List<Produto> listarTodos() {
-        log.debug("Consultando todos os produtos ordenados por id.");
-        return produtoRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+    public Page<Produto> listarTodos(Pageable pageable) {
+        log.debug("Consultando produtos paginados. page={}, size={}, sort={}.",
+                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+        return produtoRepository.findAll(pageable);
     }
 
     @Override
@@ -36,9 +37,10 @@ public class ProdutoServiceImpl implements ProdutoService {
     }
 
     @Override
-    public List<Produto> buscarPorNome(String nome) {
-        log.debug("Consultando produtos por nome contendo '{}'.", nome);
-        return produtoRepository.findByNomeContainingIgnoreCase(nome);
+    public Page<Produto> buscarPorNome(String nome, Pageable pageable) {
+        log.debug("Consultando produtos por nome contendo '{}'. page={}, size={}.",
+                nome, pageable.getPageNumber(), pageable.getPageSize());
+        return produtoRepository.findByNomeContainingIgnoreCase(nome, pageable);
     }
 
     @Override

@@ -14,8 +14,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,13 +45,13 @@ public class ClienteController {
 
     @GetMapping
     @Operation(summary = "Listar todos os clientes", description = "Retorna todos os clientes cadastrados na base.")
-    public ResponseEntity<List<ClienteResponse>> listarTodos() {
+    public ResponseEntity<PagedModel<ClienteResponse>> listarTodos(
+            @PageableDefault(size = 10, sort = "id") Pageable pageable
+    ) {
         log.info("Recebida requisicao para listar todos os clientes.");
-        List<ClienteResponse> clientes = clienteService.listarTodos().stream()
-                .map(ClienteMapper::toResponse)
-                .toList();
-        log.info("Listagem concluida com {} cliente(s).", clientes.size());
-        return ResponseEntity.ok(clientes);
+        Page<ClienteResponse> clientes = clienteService.listarTodos(pageable).map(ClienteMapper::toResponse);
+        log.info("Listagem concluida com {} cliente(s) na pagina {}.", clientes.getNumberOfElements(), clientes.getNumber());
+        return ResponseEntity.ok(toPagedModel(clientes));
     }
 
     @GetMapping("/{id}")
@@ -65,13 +69,14 @@ public class ClienteController {
 
     @GetMapping("/nome/{nome}")
     @Operation(summary = "Buscar clientes por nome", description = "Retorna os clientes cujo nome contenha o valor informado.")
-    public ResponseEntity<List<ClienteResponse>> buscarPorNome(@PathVariable String nome) {
+    public ResponseEntity<PagedModel<ClienteResponse>> buscarPorNome(
+            @PathVariable String nome,
+            @PageableDefault(size = 10, sort = "id") Pageable pageable
+    ) {
         log.info("Recebida requisicao para buscar clientes por nome: {}.", nome);
-        List<ClienteResponse> clientes = clienteService.buscarPorNome(nome).stream()
-                .map(ClienteMapper::toResponse)
-                .toList();
-        log.info("Busca por nome '{}' retornou {} cliente(s).", nome, clientes.size());
-        return ResponseEntity.ok(clientes);
+        Page<ClienteResponse> clientes = clienteService.buscarPorNome(nome, pageable).map(ClienteMapper::toResponse);
+        log.info("Busca por nome '{}' retornou {} cliente(s) na pagina {}.", nome, clientes.getNumberOfElements(), clientes.getNumber());
+        return ResponseEntity.ok(toPagedModel(clientes));
     }
 
     @GetMapping("/contar")
@@ -136,5 +141,39 @@ public class ClienteController {
         clienteService.deletar(id);
         log.info("Cliente removido com sucesso. id={}.", id);
         return ResponseEntity.noContent().build();
+    }
+
+    private PagedModel<ClienteResponse> toPagedModel(Page<ClienteResponse> page) {
+        PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(
+                page.getSize(),
+                page.getNumber(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
+        PagedModel<ClienteResponse> pagedModel = PagedModel.of(page.getContent(), metadata);
+
+        pagedModel.add(Link.of(ServletUriComponentsBuilder.fromCurrentRequest().toUriString(), "self"));
+
+        if (page.hasNext()) {
+            pagedModel.add(Link.of(
+                    ServletUriComponentsBuilder.fromCurrentRequest()
+                            .replaceQueryParam("page", page.getNumber() + 1)
+                            .replaceQueryParam("size", page.getSize())
+                            .toUriString(),
+                    "next"
+            ));
+        }
+
+        if (page.hasPrevious()) {
+            pagedModel.add(Link.of(
+                    ServletUriComponentsBuilder.fromCurrentRequest()
+                            .replaceQueryParam("page", page.getNumber() - 1)
+                            .replaceQueryParam("size", page.getSize())
+                            .toUriString(),
+                    "prev"
+            ));
+        }
+
+        return pagedModel;
     }
 }
