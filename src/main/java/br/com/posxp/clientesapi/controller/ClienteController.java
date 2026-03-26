@@ -3,6 +3,7 @@ package br.com.posxp.clientesapi.controller;
 import br.com.posxp.clientesapi.dto.ClienteRequest;
 import br.com.posxp.clientesapi.dto.ClienteResponse;
 import br.com.posxp.clientesapi.dto.ContagemResponse;
+import br.com.posxp.clientesapi.mapper.ClienteMapper;
 import br.com.posxp.clientesapi.model.Cliente;
 import br.com.posxp.clientesapi.service.ClienteService;
 import io.swagger.v3.oas.annotations.Operation;

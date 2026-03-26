@@ -3,6 +3,7 @@ package br.com.posxp.clientesapi.controller;
 import br.com.posxp.clientesapi.dto.ContagemResponse;
 import br.com.posxp.clientesapi.dto.ProdutoRequest;
 import br.com.posxp.clientesapi.dto.ProdutoResponse;
+import br.com.posxp.clientesapi.mapper.ProdutoMapper;
 import br.com.posxp.clientesapi.model.Produto;
 import br.com.posxp.clientesapi.service.ProdutoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -133,4 +134,3 @@ public class ProdutoController {
         return ResponseEntity.noContent().build();
     }
 }
-

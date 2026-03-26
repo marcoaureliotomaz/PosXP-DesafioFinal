@@ -1,4 +1,4 @@
-package br.com.posxp.clientesapi.service;
+package br.com.posxp.clientesapi.exception;
 
 public class OperacaoNaoPermitidaException extends RuntimeException {
 

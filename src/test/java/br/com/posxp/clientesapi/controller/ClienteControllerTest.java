@@ -32,7 +32,7 @@ class ClienteControllerTest {
     void deveListarTodosOsClientes() throws Exception {
         mockMvc.perform(get("/clientes"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$", hasSize(100)))
                 .andExpect(jsonPath("$[0].nome", is("Ana Silva")));
     }
 
@@ -64,7 +64,7 @@ class ClienteControllerTest {
     void deveContarClientes() throws Exception {
         mockMvc.perform(get("/clientes/contar"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.total", is(3)));
+                .andExpect(jsonPath("$.total", is(100)));
     }
 
     @Test
@@ -80,8 +80,8 @@ class ClienteControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "http://localhost/clientes/4"))
-                .andExpect(jsonPath("$.id", is(4)))
+                .andExpect(header().string("Location", "http://localhost/clientes/101"))
+                .andExpect(jsonPath("$.id", is(101)))
                 .andExpect(jsonPath("$.nome", is("Diego Martins")));
     }
 

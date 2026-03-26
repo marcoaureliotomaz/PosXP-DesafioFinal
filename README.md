@@ -89,6 +89,62 @@ src
 - `resources`: configuracoes da aplicacao e carga inicial de dados.
 - `test`: testes de integracao e unitarios.
 
+## Aplicacao Do Padrao MVC
+
+O projeto aplica o padrao MVC de forma adaptada ao contexto de API REST:
+
+- `Model`
+  - representado principalmente pela entidade `Cliente`
+  - define a estrutura do dominio persistido
+
+- `Controller`
+  - representado por `ClienteController`
+  - recebe as requisicoes HTTP e devolve as respostas da API
+
+- `Service`
+  - funciona como camada de negocio entre controller e persistencia
+  - concentra validacoes de fluxo, busca, atualizacao, exclusao e contagem
+
+Em uma API REST com Spring Boot, a camada `View` tradicional de interfaces graficas nao e utilizada. O papel de apresentacao e exercido pelo retorno JSON dos endpoints.
+
+## Decisoes Arquiteturais
+
+As principais decisoes adotadas no projeto foram:
+
+- uso de Spring Boot
+  - acelera a construcao da API e reduz codigo de infraestrutura
+
+- uso do padrao MVC
+  - facilita organizacao, manutencao e separacao de responsabilidades
+
+- uso de DTOs
+  - evita expor diretamente a entidade JPA como contrato da API
+  - melhora clareza e controle do payload HTTP
+
+- uso de Spring Data JPA com H2
+  - simplifica a persistencia
+  - permite demonstracao local rapida sem dependencias externas
+
+- uso de Swagger / OpenAPI
+  - melhora a documentacao e facilita validacao dos endpoints
+
+- uso de logs
+  - aumenta a observabilidade das requisicoes e erros da aplicacao
+
+- uso de testes automatizados
+  - reduz regressao e melhora confianca sobre os fluxos principais
+
+- uso de Docker
+  - permite executar a aplicacao mesmo sem Java instalado na maquina do avaliador
+
+## Artefatos De Arquitetura
+
+Os artefatos de documentacao arquitetural do projeto estao na pasta `doc`:
+
+- `doc/ENTREGAVEIS.md`
+- `doc/ARQUITETURA-C4.md`
+- `doc/Enunciado do Desafio Final - Arquiteto(a) de Software.pdf`
+
 ## Como Executar
 
 ### Pre-requisitos
@@ -166,6 +222,40 @@ Com a aplicacao em execucao, a documentacao interativa pode ser acessada em:
 
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+## Observabilidade
+
+O projeto utiliza Spring Boot Actuator para disponibilizar endpoints tecnicos de observabilidade.
+
+### Endpoints habilitados
+
+- Health: `http://localhost:8080/actuator/health`
+- Info: `http://localhost:8080/actuator/info`
+- Metrics: `http://localhost:8080/actuator/metrics`
+
+### Papel de cada endpoint
+
+- `health`
+  - informa se a aplicacao esta saudavel
+  - util para verificar se a API subiu corretamente e se dependencias como o banco estao disponiveis
+
+- `info`
+  - expõe informacoes da aplicacao, como nome, descricao e versao
+  - util para identificacao do sistema
+
+- `metrics`
+  - expõe metricas tecnicas da aplicacao
+  - util para inspecionar comportamento de JVM, memoria e requisicoes HTTP
+
+### Como acessar
+
+Com a aplicacao rodando localmente ou via Docker, abra no navegador ou consulte via Postman:
+
+```http
+GET /actuator/health
+GET /actuator/info
+GET /actuator/metrics
+```
 
 ## Console do Banco H2
 

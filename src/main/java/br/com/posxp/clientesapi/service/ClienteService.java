@@ -1,5 +1,7 @@
 package br.com.posxp.clientesapi.service;
 
+import br.com.posxp.clientesapi.exception.OperacaoNaoPermitidaException;
+import br.com.posxp.clientesapi.exception.RecursoNaoEncontradoException;
 import br.com.posxp.clientesapi.model.Cliente;
 import br.com.posxp.clientesapi.repository.ClienteRepository;
 import br.com.posxp.clientesapi.repository.PedidoRepository;

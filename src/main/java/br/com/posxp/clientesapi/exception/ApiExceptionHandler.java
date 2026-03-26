@@ -1,8 +1,6 @@
-package br.com.posxp.clientesapi.controller;
+package br.com.posxp.clientesapi.exception;
 
 import br.com.posxp.clientesapi.dto.ErroResponse;
-import br.com.posxp.clientesapi.service.OperacaoNaoPermitidaException;
-import br.com.posxp.clientesapi.service.RecursoNaoEncontradoException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;

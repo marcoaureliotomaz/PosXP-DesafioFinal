@@ -32,9 +32,9 @@ class PedidoControllerTest {
     void deveListarTodosOsPedidos() throws Exception {
         mockMvc.perform(get("/pedidos"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$", hasSize(10)))
                 .andExpect(jsonPath("$[0].status", is("CRIADO")))
-                .andExpect(jsonPath("$[0].itens", hasSize(2)));
+                .andExpect(jsonPath("$[0].itens", hasSize(5)));
     }
 
     @Test
@@ -43,7 +43,7 @@ class PedidoControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.clienteId", is(1)))
-                .andExpect(jsonPath("$.total", is(6399.90)));
+                .andExpect(jsonPath("$.total", is(6927.75)));
     }
 
     @Test
@@ -58,7 +58,7 @@ class PedidoControllerTest {
     void deveBuscarPedidosPorStatus() throws Exception {
         mockMvc.perform(get("/pedidos/status/CRIADO"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$[0].status", is("CRIADO")));
     }
 
@@ -66,7 +66,7 @@ class PedidoControllerTest {
     void deveContarPedidos() throws Exception {
         mockMvc.perform(get("/pedidos/contar"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.total", is(1)));
+                .andExpect(jsonPath("$.total", is(10)));
     }
 
     @Test
@@ -85,8 +85,8 @@ class PedidoControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "http://localhost/pedidos/2"))
-                .andExpect(jsonPath("$.id", is(2)))
+                .andExpect(header().string("Location", "http://localhost/pedidos/11"))
+                .andExpect(jsonPath("$.id", is(11)))
                 .andExpect(jsonPath("$.clienteId", is(2)))
                 .andExpect(jsonPath("$.status", is("CRIADO")))
                 .andExpect(jsonPath("$.total", is(2139.90)))

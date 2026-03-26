@@ -2,6 +2,7 @@ package br.com.posxp.clientesapi.service;
 
 import br.com.posxp.clientesapi.dto.PedidoItemRequest;
 import br.com.posxp.clientesapi.dto.PedidoRequest;
+import br.com.posxp.clientesapi.exception.RecursoNaoEncontradoException;
 import br.com.posxp.clientesapi.model.Cliente;
 import br.com.posxp.clientesapi.model.ItemPedido;
 import br.com.posxp.clientesapi.model.Pedido;

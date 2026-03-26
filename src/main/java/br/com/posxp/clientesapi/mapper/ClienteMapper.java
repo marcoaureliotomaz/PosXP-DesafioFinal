@@ -1,4 +1,4 @@
-package br.com.posxp.clientesapi.controller;
+package br.com.posxp.clientesapi.mapper;
 
 import br.com.posxp.clientesapi.dto.ClienteRequest;
 import br.com.posxp.clientesapi.dto.ClienteResponse;
@@ -17,4 +17,3 @@ public final class ClienteMapper {
         return new ClienteResponse(cliente.getId(), cliente.getNome(), cliente.getEmail());
     }
 }
-

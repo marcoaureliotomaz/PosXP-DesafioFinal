@@ -3,6 +3,7 @@ package br.com.posxp.clientesapi.controller;
 import br.com.posxp.clientesapi.dto.ContagemResponse;
 import br.com.posxp.clientesapi.dto.PedidoRequest;
 import br.com.posxp.clientesapi.dto.PedidoResponse;
+import br.com.posxp.clientesapi.mapper.PedidoMapper;
 import br.com.posxp.clientesapi.model.Pedido;
 import br.com.posxp.clientesapi.model.PedidoStatus;
 import br.com.posxp.clientesapi.service.PedidoService;

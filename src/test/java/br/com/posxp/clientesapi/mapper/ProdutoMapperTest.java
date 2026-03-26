@@ -1,4 +1,4 @@
-package br.com.posxp.clientesapi.controller;
+package br.com.posxp.clientesapi.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -35,4 +35,3 @@ class ProdutoMapperTest {
         assertEquals(new BigDecimal("120.00"), response.preco());
     }
 }
-

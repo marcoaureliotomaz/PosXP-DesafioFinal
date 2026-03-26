@@ -8,6 +8,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import br.com.posxp.clientesapi.exception.OperacaoNaoPermitidaException;
+import br.com.posxp.clientesapi.exception.RecursoNaoEncontradoException;
 import br.com.posxp.clientesapi.model.Produto;
 import br.com.posxp.clientesapi.repository.ItemPedidoRepository;
 import br.com.posxp.clientesapi.repository.ProdutoRepository;

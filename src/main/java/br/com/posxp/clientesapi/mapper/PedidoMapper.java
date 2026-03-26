@@ -1,4 +1,4 @@
-package br.com.posxp.clientesapi.controller;
+package br.com.posxp.clientesapi.mapper;
 
 import br.com.posxp.clientesapi.dto.PedidoItemResponse;
 import br.com.posxp.clientesapi.dto.PedidoResponse;

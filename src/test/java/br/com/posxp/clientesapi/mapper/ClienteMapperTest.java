@@ -1,4 +1,4 @@
-package br.com.posxp.clientesapi.controller;
+package br.com.posxp.clientesapi.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -32,4 +32,3 @@ class ClienteMapperTest {
         assertEquals("ana.silva@exemplo.com", response.email());
     }
 }
-

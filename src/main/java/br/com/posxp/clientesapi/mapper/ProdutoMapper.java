@@ -1,4 +1,4 @@
-package br.com.posxp.clientesapi.controller;
+package br.com.posxp.clientesapi.mapper;
 
 import br.com.posxp.clientesapi.dto.ProdutoRequest;
 import br.com.posxp.clientesapi.dto.ProdutoResponse;
@@ -17,4 +17,3 @@ public final class ProdutoMapper {
         return new ProdutoResponse(produto.getId(), produto.getNome(), produto.getDescricao(), produto.getPreco());
     }
 }
-

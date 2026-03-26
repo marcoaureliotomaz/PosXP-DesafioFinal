@@ -1,4 +1,4 @@
-package br.com.posxp.clientesapi.service;
+package br.com.posxp.clientesapi.exception;
 
 public class RecursoNaoEncontradoException extends RuntimeException {
 
@@ -6,4 +6,3 @@ public class RecursoNaoEncontradoException extends RuntimeException {
         super(message);
     }
 }
-
