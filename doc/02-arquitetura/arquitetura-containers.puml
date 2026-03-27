@@ -5,20 +5,16 @@ LAYOUT_TOP_DOWN()
 
 title Sistema de Pedidos - Diagrama de Containers
 
-Person(usuario, "Usuário / Avaliador", "Consome a API e sua documentação.")
+Person(usuario, "Usuario / Avaliador", "Consome a API REST para gerenciar clientes, produtos e pedidos.")
 
 System_Boundary(boundary_api, "Clientes API") {
-    Container(api, "Aplicação Spring Boot", "Java 17, Spring Boot 3", "Expõe endpoints REST, aplica regras de negócio, HATEOAS, validação, observabilidade e documentação OpenAPI.")
-    Container(swagger, "Swagger UI / OpenAPI", "springdoc-openapi", "Documenta e permite explorar os endpoints da API.")
-    Container(actuator, "Actuator", "Spring Boot Actuator", "Expõe health checks, info e métricas da aplicação.")
-    ContainerDb(h2, "Banco H2", "H2 Database", "Armazena clientes, produtos, pedidos e itens de pedido.")
+    Container(api, "Aplicacao Spring Boot", "Java 17, Spring Boot 3", "Container principal da solucao. Expoe endpoints REST, aplica validacoes e regras de negocio, adiciona HATEOAS e disponibiliza OpenAPI e Actuator.")
+    ContainerDb(h2, "Banco H2", "H2 Database", "Persistencia relacional em memoria para clientes, produtos, pedidos e itens de pedido.")
 }
 
-Rel(usuario, api, "Consome", "HTTP/JSON")
-Rel(usuario, swagger, "Acessa", "HTTP")
-Rel(usuario, actuator, "Consulta", "HTTP")
-Rel(swagger, api, "Lê contrato OpenAPI", "/v3/api-docs")
-Rel(api, h2, "Lê e grava dados", "JPA / Hibernate")
-Rel(actuator, api, "Monitora", "Endpoints de gestão")
+Rel(usuario, api, "Consome endpoints de negocio", "HTTP/JSON")
+Rel(usuario, api, "Consulta documentacao interativa", "HTTP / Swagger UI")
+Rel(usuario, api, "Consulta endpoints operacionais", "HTTP / Actuator")
+Rel(api, h2, "Le e grava dados", "JPA / Hibernate")
 
 @enduml
