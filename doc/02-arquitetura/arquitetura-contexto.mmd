@@ -1,7 +1,7 @@
 C4Context
 title Sistema de Pedidos - Diagrama de Contexto
 
-Person(usuario, "Usuário / Avaliador", "Consome a API para cadastrar e consultar clientes, produtos e pedidos.")
-System(clientesApi, "Clientes API", "API REST em Spring Boot para gerenciamento de clientes, produtos, pedidos e itens de pedido.")
+Person(usuario, "Usuario / Avaliador", "Consome a API REST para gerenciar clientes, produtos e pedidos.")
+System(clientesApi, "Clientes API", "API REST em Spring Boot para gerenciamento dos dominios Cliente, Produto, Pedido e ItemPedido.")
 
 Rel(usuario, clientesApi, "Consome via HTTP/JSON", "REST")
